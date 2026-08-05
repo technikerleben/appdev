@@ -34,18 +34,27 @@ import android.view.animation.DecelerateInterpolator;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends Activity {
     private static final int OPEN_EPUB = 41;
     private static final int SLATE = Color.rgb(62, 86, 104);
     private static final int PAPER = Color.rgb(245, 244, 241);
     private static final int RUST = Color.rgb(217, 122, 74);
+    private static final String DIGEST_FEED = "https://technikerleben.github.io/dailydigest/opds.xml";
 
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private final Handler handler = new Handler();
@@ -74,7 +83,10 @@ public class MainActivity extends Activity {
 
         Uri incoming = getIntent().getData();
         if (incoming != null) {
+            store.edit().putBoolean("last_is_digest", false).apply();
             openBook(incoming, getIntent().getFlags());
+        } else if (store.getBoolean("last_is_digest", false)) {
+            refreshDigest(false);
         } else {
             String last = store.getString("last_uri", null);
             if (last != null) openBook(Uri.parse(last), 0);
@@ -97,6 +109,7 @@ public class MainActivity extends Activity {
         titleView.setSingleLine(true);
         titleView.setText("EPUB Reader");
         toolbar.addView(titleView, new LinearLayout.LayoutParams(0, dp(48), 1));
+        toolbar.addView(toolButton("Morgenblatt aktualisieren", "☀", v -> refreshDigest(true)));
         toolbar.addView(toolButton("Suchen", "⌕", v -> showSearch()));
         toolbar.addView(toolButton("Darstellung", "Aa", v -> showReaderSettings()));
         toolbar.addView(toolButton("Datei öffnen", "＋", v -> chooseBook()));
@@ -188,8 +201,124 @@ public class MainActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == OPEN_EPUB && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            store.edit().putBoolean("last_is_digest", false).apply();
             openBook(data.getData(), data.getFlags());
         }
+    }
+
+    private void refreshDigest(boolean requestedByUser) {
+        File digestDir = new File(getFilesDir(), "morgenblatt");
+        File digestFile = new File(digestDir, "dailydigest.epub");
+        ProgressDialog dialog = ProgressDialog.show(this, "Mein Morgenblatt", "Aktuelle Ausgabe wird geladen …", true, false);
+        worker.execute(() -> {
+            File temporary = new File(digestDir, "dailydigest.tmp");
+            try {
+                if (!digestDir.exists() && !digestDir.mkdirs()) throw new IllegalStateException("Speicherordner konnte nicht erstellt werden.");
+                String feed = downloadText(DIGEST_FEED);
+                String epubUrl = findEpubUrl(feed);
+                downloadFile(epubUrl, temporary);
+                if (digestFile.exists() && !digestFile.delete()) throw new IllegalStateException("Alte Ausgabe konnte nicht ersetzt werden.");
+                if (!temporary.renameTo(digestFile)) {
+                    Files.copy(temporary.toPath(), digestFile.toPath());
+                    temporary.delete();
+                }
+                runOnUiThread(() -> {
+                    dialog.dismiss();
+                    store.edit().putBoolean("last_is_digest", true).apply();
+                    openBook(Uri.fromFile(digestFile), 0);
+                });
+            } catch (Exception error) {
+                temporary.delete();
+                runOnUiThread(() -> {
+                    dialog.dismiss();
+                    if (digestFile.isFile()) {
+                        if (requestedByUser) Toast.makeText(this, "Keine neue Ausgabe erreichbar – gespeicherte Ausgabe wird geöffnet.", Toast.LENGTH_LONG).show();
+                        store.edit().putBoolean("last_is_digest", true).apply();
+                        openBook(Uri.fromFile(digestFile), 0);
+                    } else {
+                        new AlertDialog.Builder(this)
+                                .setTitle("Morgenblatt nicht erreichbar")
+                                .setMessage(friendly(error))
+                                .setPositiveButton("Erneut versuchen", (alert, which) -> refreshDigest(true))
+                                .setNegativeButton("Schließen", null)
+                                .show();
+                        if (book == null) showWelcome();
+                    }
+                });
+            }
+        });
+    }
+
+    private String downloadText(String address) throws Exception {
+        HttpURLConnection connection = openConnection(address);
+        try (InputStream input = connection.getInputStream()) {
+            byte[] data = readLimited(input, 1024 * 1024);
+            return new String(data, StandardCharsets.UTF_8);
+        } finally {
+            connection.disconnect();
+        }
+    }
+
+    private void downloadFile(String address, File target) throws Exception {
+        HttpURLConnection connection = openConnection(address);
+        try (InputStream input = connection.getInputStream(); FileOutputStream output = new FileOutputStream(target)) {
+            byte[] buffer = new byte[32 * 1024];
+            int read;
+            long total = 0;
+            while ((read = input.read(buffer)) != -1) {
+                total += read;
+                if (total > 100L * 1024L * 1024L) throw new IllegalArgumentException("Die EPUB-Datei ist unerwartet groß.");
+                output.write(buffer, 0, read);
+            }
+            if (total == 0) throw new IllegalArgumentException("Die heruntergeladene EPUB-Datei ist leer.");
+        } finally {
+            connection.disconnect();
+        }
+    }
+
+    private HttpURLConnection openConnection(String address) throws Exception {
+        URL url = new URL(address);
+        if (!"https".equalsIgnoreCase(url.getProtocol()) || !"technikerleben.github.io".equalsIgnoreCase(url.getHost())) {
+            throw new SecurityException("Der Feed verweist auf eine nicht erlaubte Downloadadresse.");
+        }
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setConnectTimeout(12_000);
+        connection.setReadTimeout(20_000);
+        connection.setInstanceFollowRedirects(true);
+        connection.setRequestProperty("User-Agent", "EPUB-Reader/1.2");
+        int status = connection.getResponseCode();
+        if (status < 200 || status >= 300) {
+            connection.disconnect();
+            throw new IllegalStateException("Der Server antwortet mit HTTP " + status + ".");
+        }
+        return connection;
+    }
+
+    private byte[] readLimited(InputStream input, int maximum) throws Exception {
+        java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream();
+        byte[] buffer = new byte[8192];
+        int read;
+        while ((read = input.read(buffer)) != -1) {
+            if (output.size() + read > maximum) throw new IllegalArgumentException("Der OPDS-Feed ist unerwartet groß.");
+            output.write(buffer, 0, read);
+        }
+        return output.toByteArray();
+    }
+
+    private String findEpubUrl(String feed) {
+        Matcher tags = Pattern.compile("<link\\b[^>]*>", Pattern.CASE_INSENSITIVE).matcher(feed);
+        while (tags.find()) {
+            String tag = tags.group();
+            String type = attribute(tag, "type");
+            String href = attribute(tag, "href");
+            if ("application/epub+zip".equalsIgnoreCase(type) && href != null) return href.replace("&amp;", "&");
+        }
+        throw new IllegalArgumentException("Im OPDS-Feed wurde keine EPUB-Ausgabe gefunden.");
+    }
+
+    private String attribute(String tag, String name) {
+        Matcher matcher = Pattern.compile("\\b" + name + "\\s*=\\s*(['\"])(.*?)\\1", Pattern.CASE_INSENSITIVE).matcher(tag);
+        return matcher.find() ? matcher.group(2) : null;
     }
 
     private void openBook(Uri uri, int flags) {
