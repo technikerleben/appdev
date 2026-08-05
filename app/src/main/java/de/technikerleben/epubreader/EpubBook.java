@@ -23,6 +23,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 final class EpubBook {
     static final class Chapter {
@@ -48,9 +49,10 @@ final class EpubBook {
         deleteTree(root);
         if (!root.mkdirs()) throw new IllegalStateException("Temporärer Buchordner konnte nicht erstellt werden.");
 
-        try (InputStream input = context.getContentResolver().openInputStream(uri);
-             ZipInputStream zip = new ZipInputStream(input)) {
-            if (input == null) throw new IllegalArgumentException("Die Datei konnte nicht geöffnet werden.");
+        InputStream source = context.getContentResolver().openInputStream(uri);
+        if (source == null) throw new IllegalArgumentException("Android hat keinen Lesezugriff auf die ausgewählte Datei gewährt.");
+        int extractedFiles = 0;
+        try (InputStream input = source; ZipInputStream zip = new ZipInputStream(input)) {
             ZipEntry entry;
             byte[] buffer = new byte[32 * 1024];
             String rootPath = root.getCanonicalPath() + File.separator;
@@ -68,15 +70,25 @@ final class EpubBook {
                         int read;
                         while ((read = zip.read(buffer)) != -1) output.write(buffer, 0, read);
                     }
+                    extractedFiles++;
                 }
                 zip.closeEntry();
             }
         }
 
-        Document container = parseXml(new File(root, "META-INF/container.xml"));
+        if (extractedFiles == 0) {
+            throw new IllegalArgumentException("Die ausgewählte Datei ist kein gültiges EPUB-Archiv.");
+        }
+
+        File containerFile = findIgnoreCase(root, "META-INF/container.xml");
+        if (containerFile == null) {
+            throw new IllegalArgumentException("Die EPUB-Struktur META-INF/container.xml fehlt.");
+        }
+        Document container = parseXml(containerFile);
         Element rootFile = first(container, "rootfile");
         if (rootFile == null) throw new IllegalArgumentException("Kein EPUB-Inhalt gefunden.");
-        File opf = new File(root, rootFile.getAttribute("full-path"));
+        File opf = new File(root, Uri.decode(rootFile.getAttribute("full-path")));
+        if (!opf.isFile()) throw new IllegalArgumentException("Die Inhaltsdatei des EPUBs fehlt.");
         Document packageDoc = parseXml(opf);
         File contentDir = opf.getParentFile();
 
@@ -172,12 +184,37 @@ final class EpubBook {
     private static Document parseXml(File file) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
-        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        // Android-Versionen unterscheiden sich darin, welche Parser-Features sie
+        // unterstützen. Nicht unterstützte Sicherheitsoptionen dürfen den Import
+        // eines ansonsten gültigen EPUBs nicht vollständig abbrechen.
+        optionalFeature(factory, "http://xml.org/sax/features/external-general-entities", false);
+        optionalFeature(factory, "http://xml.org/sax/features/external-parameter-entities", false);
+        optionalFeature(factory, "http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        try { factory.setXIncludeAware(false); } catch (UnsupportedOperationException ignored) { }
+        try { factory.setExpandEntityReferences(false); } catch (UnsupportedOperationException ignored) { }
         try (FileInputStream input = new FileInputStream(file)) {
             return factory.newDocumentBuilder().parse(input);
         }
+    }
+
+    private static void optionalFeature(DocumentBuilderFactory factory, String feature, boolean value) {
+        try { factory.setFeature(feature, value); }
+        catch (ParserConfigurationException | AbstractMethodError ignored) { }
+    }
+
+    private static File findIgnoreCase(File root, String relativePath) {
+        File current = root;
+        for (String part : relativePath.split("/")) {
+            File[] children = current.listFiles();
+            if (children == null) return null;
+            File match = null;
+            for (File child : children) {
+                if (child.getName().equalsIgnoreCase(part)) { match = child; break; }
+            }
+            if (match == null) return null;
+            current = match;
+        }
+        return current;
     }
 
     private static Element first(Document doc, String localName) {
