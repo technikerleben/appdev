@@ -171,8 +171,13 @@ public class MainActivity extends Activity {
     private void chooseBook() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("application/epub+zip");
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"application/epub+zip", "application/zip"});
+        // Einige Android-Dateimanager melden EPUB-Dateien fälschlich als ZIP,
+        // Binärdatei oder ganz ohne passenden MIME-Typ. Die App prüft den Inhalt
+        // nach der Auswahl selbst zuverlässig.
+        intent.setType("*/*");
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
+                "application/epub+zip", "application/zip", "application/octet-stream"
+        });
         startActivityForResult(intent, OPEN_EPUB);
     }
 
@@ -208,7 +213,12 @@ public class MainActivity extends Activity {
             } catch (Exception error) {
                 runOnUiThread(() -> {
                     dialog.dismiss();
-                    Toast.makeText(this, "EPUB konnte nicht geöffnet werden: " + friendly(error), Toast.LENGTH_LONG).show();
+                    new AlertDialog.Builder(this)
+                            .setTitle("EPUB konnte nicht geöffnet werden")
+                            .setMessage(friendly(error))
+                            .setPositiveButton("Andere Datei wählen", (dialog, which) -> chooseBook())
+                            .setNegativeButton("Schließen", null)
+                            .show();
                     if (book == null) showWelcome();
                 });
             }
@@ -216,7 +226,9 @@ public class MainActivity extends Activity {
     }
 
     private String friendly(Exception error) {
-        String message = error.getMessage();
+        Throwable cause = error;
+        while (cause.getCause() != null) cause = cause.getCause();
+        String message = cause.getMessage();
         return message == null || message.trim().isEmpty() ? "unbekanntes Dateiformat" : message;
     }
 
