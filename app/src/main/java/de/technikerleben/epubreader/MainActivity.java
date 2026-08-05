@@ -238,7 +238,10 @@ public class MainActivity extends Activity {
         try {
             EpubBook.Chapter item = book.chapters.get(chapter);
             String base = item.file.getParentFile().toURI().toString();
-            webView.loadDataWithBaseURL(base, book.html(chapter, readerPreferences), "application/xhtml+xml", "UTF-8", null);
+            // EPUB-Kapitel sind häufig als XHTML deklariert, enthalten in der
+            // Praxis aber kleine HTML-Unsauberkeiten. text/html rendert sie wie
+            // ein normaler E-Book-Reader, statt eine XML-Fehlerseite anzuzeigen.
+            webView.loadDataWithBaseURL(base, book.html(chapter, readerPreferences), "text/html", "UTF-8", null);
             updateNavigation();
         } catch (Exception error) {
             Toast.makeText(this, "Kapitel konnte nicht angezeigt werden.", Toast.LENGTH_LONG).show();
