@@ -2,13 +2,16 @@
 
 Ein einfacher, vollständig lokaler EPUB-Reader für Smartphones im Hochformat. Die App benötigt weder Konto noch Internetzugriff und läuft ab Android 8 (getestetes Ziel: Android 13).
 
-Aktuelle Version: **1.1.0**
+Aktuelle Version: **1.2.0**
 
 ## Funktionen
 
 - EPUB-Dateien über den Android-Dateiauswahldialog öffnen
 - Inhaltsverzeichnis und Kapitel-Navigation
 - seitenweises Blättern durch horizontales Wischen, ohne vertikales Scrollen
+- direkter Zugriff auf die jeweils aktuelle Ausgabe von „Mein Morgenblatt“ über den OPDS-Feed
+- automatische Aktualisierung beim Start, wenn zuletzt das Morgenblatt gelesen wurde
+- Offline-Rückfall auf die zuletzt heruntergeladene Ausgabe
 - automatische Speicherung von Buch, Kapitel und Scrollposition
 - Lesezeichen pro Buch
 - Suche im aktuellen Kapitel
