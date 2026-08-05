@@ -32,6 +32,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.view.animation.DecelerateInterpolator;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -48,6 +51,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class MainActivity extends Activity {
     private static final int OPEN_EPUB = 41;
@@ -55,6 +61,22 @@ public class MainActivity extends Activity {
     private static final int PAPER = Color.rgb(245, 244, 241);
     private static final int RUST = Color.rgb(217, 122, 74);
     private static final String DIGEST_FEED = "https://technikerleben.github.io/dailydigest/opds.xml";
+    private static final String RECENT_BOOKS = "recent_books";
+    private static final int MAX_RECENT_BOOKS = 12;
+
+    private static final class RecentBook {
+        final String uri;
+        final String title;
+        final long lastRead;
+        final boolean digest;
+
+        RecentBook(String uri, String title, long lastRead, boolean digest) {
+            this.uri = uri;
+            this.title = title;
+            this.lastRead = lastRead;
+            this.digest = digest;
+        }
+    }
 
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private final Handler handler = new Handler();
@@ -109,6 +131,7 @@ public class MainActivity extends Activity {
         titleView.setSingleLine(true);
         titleView.setText("EPUB Reader");
         toolbar.addView(titleView, new LinearLayout.LayoutParams(0, dp(48), 1));
+        toolbar.addView(toolButton("Bibliothek", "▤", v -> showLibrary()));
         toolbar.addView(toolButton("Morgenblatt aktualisieren", "☀", v -> refreshDigest(true)));
         toolbar.addView(toolButton("Suchen", "⌕", v -> showSearch()));
         toolbar.addView(toolButton("Darstellung", "Aa", v -> showReaderSettings()));
@@ -158,6 +181,9 @@ public class MainActivity extends Activity {
     private Button toolButton(String description, String text, View.OnClickListener listener) {
         Button button = navButton(text, description, listener);
         button.setTextSize("Aa".equals(text) ? 15 : 22);
+        button.setMinWidth(0);
+        button.setMinimumWidth(0);
+        button.setLayoutParams(new LinearLayout.LayoutParams(dp(46), dp(48)));
         return button;
     }
 
@@ -195,6 +221,104 @@ public class MainActivity extends Activity {
                 "application/epub+zip", "application/zip", "application/octet-stream"
         });
         startActivityForResult(intent, OPEN_EPUB);
+    }
+
+    private void showLibrary() {
+        List<RecentBook> books = loadRecentBooks();
+        LinearLayout panel = new LinearLayout(this);
+        panel.setOrientation(LinearLayout.VERTICAL);
+        TextView hint = new TextView(this);
+        hint.setText(books.isEmpty() ? "Noch keine Bücher gelesen" : "Tippe zum Öffnen. Halte einen Eintrag gedrückt, um ihn zu entfernen.");
+        hint.setTextColor(Color.DKGRAY);
+        hint.setTextSize(14);
+        hint.setPadding(dp(20), dp(12), dp(20), dp(8));
+        panel.addView(hint);
+
+        ListView list = new ListView(this);
+        List<String> rows = new ArrayList<>();
+        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy, HH:mm", Locale.GERMANY);
+        String current = bookUri == null ? null : bookUri.toString();
+        for (RecentBook item : books) {
+            String marker = item.uri.equals(current) ? "▶  " : (item.digest ? "☀  " : "▤  ");
+            rows.add(marker + item.title + "\nZuletzt gelesen: " + format.format(new Date(item.lastRead)));
+        }
+        list.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, rows));
+        panel.addView(list, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                books.isEmpty() ? dp(40) : Math.min(dp(420), dp(72) * books.size())));
+
+        AlertDialog library = new AlertDialog.Builder(this)
+                .setTitle("Bibliothek")
+                .setView(panel)
+                .setPositiveButton("Morgenblatt", (dialog, which) -> refreshDigest(true))
+                .setNeutralButton("Datei hinzufügen", (dialog, which) -> chooseBook())
+                .setNegativeButton("Schließen", null)
+                .create();
+        list.setOnItemClickListener((parent, view, position, id) -> {
+            RecentBook selected = books.get(position);
+            library.dismiss();
+            if (selected.digest) {
+                store.edit().putBoolean("last_is_digest", true).apply();
+                refreshDigest(false);
+            } else {
+                store.edit().putBoolean("last_is_digest", false).apply();
+                openBook(Uri.parse(selected.uri), 0);
+            }
+        });
+        list.setOnItemLongClickListener((parent, view, position, id) -> {
+            RecentBook selected = books.get(position);
+            new AlertDialog.Builder(this)
+                    .setTitle("Aus Bibliothek entfernen?")
+                    .setMessage("„" + selected.title + "“ wird nur aus dieser Liste entfernt. Die EPUB-Datei bleibt erhalten.")
+                    .setPositiveButton("Entfernen", (dialog, which) -> {
+                        books.remove(position);
+                        saveRecentBooks(books);
+                        library.dismiss();
+                        showLibrary();
+                    })
+                    .setNegativeButton("Abbrechen", null)
+                    .show();
+            return true;
+        });
+        library.show();
+    }
+
+    private List<RecentBook> loadRecentBooks() {
+        List<RecentBook> result = new ArrayList<>();
+        try {
+            JSONArray array = new JSONArray(store.getString(RECENT_BOOKS, "[]"));
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject item = array.getJSONObject(i);
+                result.add(new RecentBook(item.getString("uri"), item.optString("title", "Unbenanntes Buch"),
+                        item.optLong("lastRead", 0), item.optBoolean("digest", false)));
+            }
+        } catch (Exception ignored) { }
+        return result;
+    }
+
+    private void saveRecentBooks(List<RecentBook> books) {
+        JSONArray array = new JSONArray();
+        try {
+            for (int i = 0; i < Math.min(books.size(), MAX_RECENT_BOOKS); i++) {
+                RecentBook item = books.get(i);
+                JSONObject json = new JSONObject();
+                json.put("uri", item.uri);
+                json.put("title", item.title);
+                json.put("lastRead", item.lastRead);
+                json.put("digest", item.digest);
+                array.put(json);
+            }
+        } catch (Exception ignored) { }
+        store.edit().putString(RECENT_BOOKS, array.toString()).apply();
+    }
+
+    private void rememberBook(String title, Uri uri, boolean digest) {
+        List<RecentBook> books = loadRecentBooks();
+        String key = uri.toString();
+        for (int i = books.size() - 1; i >= 0; i--) {
+            if (books.get(i).uri.equals(key) || (digest && books.get(i).digest)) books.remove(i);
+        }
+        books.add(0, new RecentBook(key, title, System.currentTimeMillis(), digest));
+        saveRecentBooks(books);
     }
 
     @Override
@@ -340,6 +464,7 @@ public class MainActivity extends Activity {
                     chapter = Math.max(0, Math.min(store.getInt(prefix + "chapter", 0), book.chapters.size() - 1));
                     restoreRatio = store.getFloat(prefix + "ratio", 0f);
                     titleView.setText(book.title);
+                    rememberBook(book.title, bookUri, store.getBoolean("last_is_digest", false));
                     showChapter();
                 });
             } catch (Exception error) {
@@ -579,6 +704,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onPause() {
         savePositionNow();
+        if (book != null && bookUri != null) {
+            rememberBook(book.title, bookUri, store.getBoolean("last_is_digest", false));
+        }
         super.onPause();
     }
 
