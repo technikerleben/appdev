@@ -216,7 +216,7 @@ public class MainActivity extends Activity {
                     new AlertDialog.Builder(this)
                             .setTitle("EPUB konnte nicht geöffnet werden")
                             .setMessage(friendly(error))
-                            .setPositiveButton("Andere Datei wählen", (dialog, which) -> chooseBook())
+                            .setPositiveButton("Andere Datei wählen", (alert, which) -> chooseBook())
                             .setNegativeButton("Schließen", null)
                             .show();
                     if (book == null) showWelcome();
