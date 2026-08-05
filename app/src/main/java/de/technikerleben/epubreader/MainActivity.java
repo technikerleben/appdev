@@ -3,6 +3,7 @@ package de.technikerleben.epubreader;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -10,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -28,6 +30,7 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.animation.DecelerateInterpolator;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -269,7 +272,8 @@ public class MainActivity extends Activity {
             bookmark.setText("☆");
             return;
         }
-        positionView.setText((chapter + 1) + " / " + book.chapters.size() + "  ·  " + book.chapters.get(chapter).title);
+        positionView.setText((chapter + 1) + " / " + book.chapters.size() + "  ·  Seite " +
+                (webView.currentPage() + 1) + " / " + webView.pageCount() + "\n" + book.chapters.get(chapter).title);
         bookmark.setText(bookmarks().contains(chapter) ? "★" : "☆");
         updateProgress();
     }
@@ -421,8 +425,8 @@ public class MainActivity extends Activity {
     }
 
     private float scrollRatio() {
-        int range = Math.max(1, webView.scrollRange() - webView.getHeight());
-        return Math.max(0f, Math.min(1f, webView.getScrollY() / (float) range));
+        int range = Math.max(1, webView.scrollRange() - webView.getWidth());
+        return Math.max(0f, Math.min(1f, webView.getScrollX() / (float) range));
     }
 
     private void updateProgress() {
@@ -467,9 +471,76 @@ public class MainActivity extends Activity {
     }
 
     private final class ReaderWebView extends WebView {
-        ReaderWebView() { super(MainActivity.this); setBackgroundColor(PAPER); }
+        private float downX;
+        private float downY;
 
-        int scrollRange() { return computeVerticalScrollRange(); }
+        ReaderWebView() {
+            super(MainActivity.this);
+            setBackgroundColor(PAPER);
+            setVerticalScrollBarEnabled(false);
+            setHorizontalScrollBarEnabled(false);
+            setOverScrollMode(OVER_SCROLL_NEVER);
+        }
+
+        int scrollRange() { return computeHorizontalScrollRange(); }
+
+        int pageCount() {
+            if (getWidth() <= 0) return 1;
+            return Math.max(1, (int) Math.ceil(scrollRange() / (double) getWidth()));
+        }
+
+        int currentPage() {
+            if (getWidth() <= 0) return 0;
+            return Math.max(0, Math.min(pageCount() - 1, Math.round(getScrollX() / (float) getWidth())));
+        }
+
+        void showPage(int page) {
+            int targetPage = Math.max(0, Math.min(pageCount() - 1, page));
+            int maximum = Math.max(0, scrollRange() - getWidth());
+            int target = Math.min(maximum, targetPage * getWidth());
+            ObjectAnimator animation = ObjectAnimator.ofInt(this, "scrollX", getScrollX(), target);
+            animation.setDuration(220);
+            animation.setInterpolator(new DecelerateInterpolator());
+            animation.start();
+            handler.postDelayed(MainActivity.this::updateNavigation, 240);
+        }
+
+        private void turnPage(int direction) {
+            int page = currentPage();
+            if (direction > 0 && page < pageCount() - 1) {
+                showPage(page + 1);
+            } else if (direction < 0 && page > 0) {
+                showPage(page - 1);
+            } else if (direction > 0 && book != null && chapter < book.chapters.size() - 1) {
+                savePositionNow();
+                chapter++;
+                restoreRatio = 0f;
+                showChapter();
+            } else if (direction < 0 && book != null && chapter > 0) {
+                savePositionNow();
+                chapter--;
+                restoreRatio = 1f;
+                showChapter();
+            }
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                downX = event.getX();
+                downY = event.getY();
+                return true;
+            }
+            if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+                float dx = event.getX() - downX;
+                float dy = event.getY() - downY;
+                if (Math.abs(dx) > dp(45) && Math.abs(dx) > Math.abs(dy)) {
+                    turnPage(dx < 0 ? 1 : -1);
+                }
+                return true;
+            }
+            return true;
+        }
 
         @Override
         protected void onScrollChanged(int left, int top, int oldLeft, int oldTop) {
@@ -500,9 +571,11 @@ public class MainActivity extends Activity {
             final float ratio = restoreRatio;
             restoreRatio = 0f;
             view.postDelayed(() -> {
-                int range = Math.max(0, webView.scrollRange() - webView.getHeight());
-                webView.scrollTo(0, Math.round(range * ratio));
-                updateProgress();
+                int range = Math.max(0, webView.scrollRange() - webView.getWidth());
+                webView.scrollTo(Math.round(range * ratio), 0);
+                // Nach dem Layout immer exakt auf die nächstgelegene Seite einrasten.
+                webView.showPage(webView.currentPage());
+                updateNavigation();
             }, 120);
         }
     }
