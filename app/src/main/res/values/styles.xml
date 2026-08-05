@@ -1,0 +1,10 @@
+<resources>
+    <style name="Theme.EpubReader" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#D97A4A</item>
+        <item name="android:navigationBarColor">#263642</item>
+        <item name="android:statusBarColor">#3E5668</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+</resources>
