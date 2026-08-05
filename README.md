@@ -2,12 +2,13 @@
 
 Ein einfacher, vollständig lokaler EPUB-Reader für Smartphones im Hochformat. Die App benötigt weder Konto noch Internetzugriff und läuft ab Android 8 (getestetes Ziel: Android 13).
 
-Aktuelle Version: **1.0.2**
+Aktuelle Version: **1.1.0**
 
 ## Funktionen
 
 - EPUB-Dateien über den Android-Dateiauswahldialog öffnen
 - Inhaltsverzeichnis und Kapitel-Navigation
+- seitenweises Blättern durch horizontales Wischen, ohne vertikales Scrollen
 - automatische Speicherung von Buch, Kapitel und Scrollposition
 - Lesezeichen pro Buch
 - Suche im aktuellen Kapitel
