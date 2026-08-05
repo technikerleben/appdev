@@ -167,12 +167,16 @@ final class EpubBook {
         source = source.replaceAll("(?is)<script\\b[^>]*>.*?</script>", "")
                 .replaceAll("(?is)<iframe\\b[^>]*>.*?</iframe>", "")
                 .replaceAll("(?i)\\son[a-z]+\\s*=\\s*(['\"]).*?\\1", "");
-        String css = "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\" />" +
-                "<style>html,body{background:" + preferences.background + "!important;color:" + preferences.foreground +
-                "!important}body{font-family:" + preferences.fontFamily + "!important;font-size:" + preferences.fontSize +
-                "px!important;line-height:" + preferences.lineHeight + "!important;margin:" + preferences.margin +
-                "px!important;overflow-wrap:anywhere}p{margin:.65em 0}img,svg,video{max-width:100%!important;height:auto!important}" +
-                "table{max-width:100%!important;display:block;overflow-x:auto}a{color:" + preferences.link +
+        int pageGap = preferences.margin * 2;
+        String css = "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no\" />" +
+                "<style>html,body{width:100%;height:100%;padding:0;overflow:hidden;background:" + preferences.background +
+                "!important;color:" + preferences.foreground + "!important}body{box-sizing:border-box;font-family:" +
+                preferences.fontFamily + "!important;font-size:" + preferences.fontSize + "px!important;line-height:" +
+                preferences.lineHeight + "!important;margin:0!important;padding:" + preferences.margin +
+                "px!important;column-width:calc(100vw - " + pageGap + "px);column-gap:" + pageGap +
+                "px;column-fill:auto;overflow-wrap:anywhere}p{margin:.65em 0}h1,h2,h3,h4,figure,img,svg,video{break-inside:avoid}" +
+                "img,svg,video{max-width:100%!important;max-height:calc(100vh - " + pageGap +
+                "px)!important;height:auto!important}table{max-width:100%!important;font-size:.9em}a{color:" + preferences.link +
                 "!important}pre{white-space:pre-wrap}body>*:first-child{margin-top:0}</style>";
         int head = source.toLowerCase().indexOf("</head>");
         if (head >= 0) return source.substring(0, head) + css + source.substring(head);
