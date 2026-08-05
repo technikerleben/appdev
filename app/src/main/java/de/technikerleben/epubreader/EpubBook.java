@@ -167,7 +167,7 @@ final class EpubBook {
         source = source.replaceAll("(?is)<script\\b[^>]*>.*?</script>", "")
                 .replaceAll("(?is)<iframe\\b[^>]*>.*?</iframe>", "")
                 .replaceAll("(?i)\\son[a-z]+\\s*=\\s*(['\"]).*?\\1", "");
-        String css = "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
+        String css = "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\" />" +
                 "<style>html,body{background:" + preferences.background + "!important;color:" + preferences.foreground +
                 "!important}body{font-family:" + preferences.fontFamily + "!important;font-size:" + preferences.fontSize +
                 "px!important;line-height:" + preferences.lineHeight + "!important;margin:" + preferences.margin +
