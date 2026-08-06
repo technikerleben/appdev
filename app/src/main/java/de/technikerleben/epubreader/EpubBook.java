@@ -13,6 +13,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -163,7 +164,7 @@ final class EpubBook {
     }
 
     String html(int index, ReaderPreferences preferences) throws Exception {
-        String source = new String(Files.readAllBytes(chapters.get(index).file.toPath()), StandardCharsets.UTF_8);
+        String source = decodeText(Files.readAllBytes(chapters.get(index).file.toPath()));
         source = source.replaceAll("(?is)<script\\b[^>]*>.*?</script>", "")
                 .replaceAll("(?is)<iframe\\b[^>]*>.*?</iframe>", "")
                 .replaceAll("(?i)\\son[a-z]+\\s*=\\s*(['\"]).*?\\1", "");
@@ -186,6 +187,37 @@ final class EpubBook {
         int body = source.toLowerCase().indexOf("<body");
         if (body >= 0) return source.substring(0, body) + "<head>" + css + "</head>" + source.substring(body);
         return "<!doctype html><html><head>" + css + "</head><body>" + source + "</body></html>";
+    }
+
+    private static String decodeText(byte[] data) {
+        int offset = 0;
+        Charset charset = StandardCharsets.UTF_8;
+        if (data.length >= 3 && (data[0] & 0xff) == 0xef && (data[1] & 0xff) == 0xbb && (data[2] & 0xff) == 0xbf) {
+            offset = 3;
+        } else if (data.length >= 2 && (data[0] & 0xff) == 0xff && (data[1] & 0xff) == 0xfe) {
+            charset = StandardCharsets.UTF_16LE;
+            offset = 2;
+        } else if (data.length >= 2 && (data[0] & 0xff) == 0xfe && (data[1] & 0xff) == 0xff) {
+            charset = StandardCharsets.UTF_16BE;
+            offset = 2;
+        } else {
+            String header = new String(data, 0, Math.min(data.length, 8192), StandardCharsets.ISO_8859_1);
+            java.util.regex.Matcher declaration = java.util.regex.Pattern
+                    .compile("(?i)<\\?xml[^>]*encoding\\s*=\\s*['\"]\\s*([^'\"\\s]+)")
+                    .matcher(header);
+            java.util.regex.Matcher meta = java.util.regex.Pattern
+                    .compile("(?i)<meta[^>]+charset\\s*=\\s*['\"]?\\s*([^'\"\\s/>;]+)")
+                    .matcher(header);
+            java.util.regex.Matcher httpEquiv = java.util.regex.Pattern
+                    .compile("(?i)<meta[^>]+content\\s*=\\s*['\"][^'\"]*charset\\s*=\\s*([^'\";\\s]+)")
+                    .matcher(header);
+            String declared = declaration.find() ? declaration.group(1) : (meta.find() ? meta.group(1) : (httpEquiv.find() ? httpEquiv.group(1) : null));
+            if (declared != null) {
+                try { charset = Charset.forName(declared.trim()); }
+                catch (Exception ignored) { charset = StandardCharsets.UTF_8; }
+            }
+        }
+        return new String(data, offset, data.length - offset, charset);
     }
 
     private static Document parseXml(File file) throws Exception {
