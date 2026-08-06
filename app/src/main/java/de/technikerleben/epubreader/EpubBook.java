@@ -304,6 +304,12 @@ final class EpubBook {
     }
 
     private static Document parseXml(File file) throws Exception {
+        try (FileInputStream input = new FileInputStream(file)) {
+            return parseXml(input);
+        }
+    }
+
+    static Document parseXml(InputStream input) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         // Android-Versionen unterscheiden sich darin, welche Parser-Features sie
@@ -314,9 +320,7 @@ final class EpubBook {
         optionalFeature(factory, "http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         try { factory.setXIncludeAware(false); } catch (UnsupportedOperationException ignored) { }
         try { factory.setExpandEntityReferences(false); } catch (UnsupportedOperationException ignored) { }
-        try (FileInputStream input = new FileInputStream(file)) {
-            return factory.newDocumentBuilder().parse(input);
-        }
+        return factory.newDocumentBuilder().parse(input);
     }
 
     private static void optionalFeature(DocumentBuilderFactory factory, String feature, boolean value) {

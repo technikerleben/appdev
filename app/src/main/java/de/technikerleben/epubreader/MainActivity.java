@@ -47,6 +47,9 @@ import android.view.animation.DecelerateInterpolator;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -64,8 +67,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -523,7 +524,19 @@ public class MainActivity extends Activity {
             File temporary = new File(digestDir, "dailydigest.tmp");
             try {
                 if (!digestDir.exists() && !digestDir.mkdirs()) throw new IllegalStateException(getString(R.string.storage_folder_failed));
-                String feed = downloadText(DIGEST_FEED);
+                String feed = downloadFeed();
+                if (feed == null && digestFile.isFile()) {
+                    runOnUiThreadIfAlive(() -> {
+                        hideLoading();
+                        store.edit().putBoolean("last_is_digest", true).apply();
+                        openBook(Uri.fromFile(digestFile), 0);
+                    });
+                    return;
+                }
+                if (feed == null) {
+                    store.edit().remove("digest_etag").remove("digest_last_modified").apply();
+                    feed = downloadFeed();
+                }
                 String epubUrl = findEpubUrl(feed);
                 downloadFile(epubUrl, temporary);
                 if (digestFile.exists() && !digestFile.delete()) throw new IllegalStateException(getString(R.string.replace_issue_failed));
@@ -558,10 +571,26 @@ public class MainActivity extends Activity {
         });
     }
 
-    private String downloadText(String address) throws Exception {
-        HttpURLConnection connection = openConnection(address);
+    private String downloadFeed() throws Exception {
+        HttpURLConnection connection = openConnection(DIGEST_FEED);
+        String etag = store.getString("digest_etag", null);
+        String modified = store.getString("digest_last_modified", null);
+        if (etag != null) connection.setRequestProperty("If-None-Match", etag);
+        if (modified != null) connection.setRequestProperty("If-Modified-Since", modified);
+        int status = connection.getResponseCode();
+        if (status == HttpURLConnection.HTTP_NOT_MODIFIED) {
+            connection.disconnect();
+            return null;
+        }
+        requireSuccess(connection, status);
         try (InputStream input = connection.getInputStream()) {
             byte[] data = readLimited(input, 1024 * 1024);
+            SharedPreferences.Editor metadata = store.edit();
+            String responseEtag = connection.getHeaderField("ETag");
+            String responseModified = connection.getHeaderField("Last-Modified");
+            if (responseEtag != null) metadata.putString("digest_etag", responseEtag);
+            if (responseModified != null) metadata.putString("digest_last_modified", responseModified);
+            metadata.apply();
             return new String(data, StandardCharsets.UTF_8);
         } finally {
             connection.disconnect();
@@ -570,6 +599,7 @@ public class MainActivity extends Activity {
 
     private void downloadFile(String address, File target) throws Exception {
         HttpURLConnection connection = openConnection(address);
+        requireSuccess(connection, connection.getResponseCode());
         try (InputStream input = connection.getInputStream(); FileOutputStream output = new FileOutputStream(target)) {
             byte[] buffer = new byte[32 * 1024];
             int read;
@@ -594,13 +624,15 @@ public class MainActivity extends Activity {
         connection.setConnectTimeout(12_000);
         connection.setReadTimeout(20_000);
         connection.setInstanceFollowRedirects(true);
-        connection.setRequestProperty("User-Agent", "EPUB-Reader/1.2");
-        int status = connection.getResponseCode();
+        connection.setRequestProperty("User-Agent", "EPUB-Reader/" + BuildConfig.VERSION_NAME);
+        return connection;
+    }
+
+    private void requireSuccess(HttpURLConnection connection, int status) throws Exception {
         if (status < 200 || status >= 300) {
             connection.disconnect();
             throw new IllegalStateException(getString(R.string.server_status, status));
         }
-        return connection;
     }
 
     private byte[] readLimited(InputStream input, int maximum) throws Exception {
@@ -614,20 +646,18 @@ public class MainActivity extends Activity {
         return output.toByteArray();
     }
 
-    private String findEpubUrl(String feed) {
-        Matcher tags = Pattern.compile("<link\\b[^>]*>", Pattern.CASE_INSENSITIVE).matcher(feed);
-        while (tags.find()) {
-            String tag = tags.group();
-            String type = attribute(tag, "type");
-            String href = attribute(tag, "href");
-            if ("application/epub+zip".equalsIgnoreCase(type) && href != null) return href.replace("&amp;", "&");
+    private String findEpubUrl(String feed) throws Exception {
+        try (InputStream input = new ByteArrayInputStream(feed.getBytes(StandardCharsets.UTF_8))) {
+            Document document = EpubBook.parseXml(input);
+            NodeList links = document.getElementsByTagNameNS("*", "link");
+            for (int i = 0; i < links.getLength(); i++) {
+                Element link = (Element) links.item(i);
+                if ("application/epub+zip".equalsIgnoreCase(link.getAttribute("type")) && !link.getAttribute("href").isEmpty()) {
+                    return link.getAttribute("href");
+                }
+            }
         }
         throw new IllegalArgumentException(getString(R.string.feed_no_epub));
-    }
-
-    private String attribute(String tag, String name) {
-        Matcher matcher = Pattern.compile("\\b" + name + "\\s*=\\s*(['\"])(.*?)\\1", Pattern.CASE_INSENSITIVE).matcher(tag);
-        return matcher.find() ? matcher.group(2) : null;
     }
 
     private void openBook(Uri uri, int flags) {
