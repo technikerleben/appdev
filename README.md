@@ -2,7 +2,7 @@
 
 Ein einfacher, vollständig lokaler EPUB-Reader für Smartphones im Hochformat. Die App benötigt weder Konto noch Internetzugriff und läuft ab Android 8 (getestetes Ziel: Android 13).
 
-Aktuelle Version: **1.3.0**
+Aktuelle Version: **1.3.1**
 
 ## Funktionen
 
@@ -20,7 +20,7 @@ Aktuelle Version: **1.3.0**
 - Schriftgröße, Zeilenabstand und Seitenrand
 - vier Schriftarten
 - fünf Farbschemata einschließlich Sepia-, Dunkel- und Schwarzmodus
-- regelbare Bildschirmhelligkeit innerhalb der App
+- Übernahme der Android-Systemhelligkeit einschließlich automatischer Helligkeit
 - lokale Darstellung von Text, Bildern und eingebetteten Styles
 - blockierte Internetzugriffe und deaktivierte EPUB-Skripte
 
