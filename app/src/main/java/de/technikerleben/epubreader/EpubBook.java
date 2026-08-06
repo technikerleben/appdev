@@ -112,8 +112,8 @@ final class EpubBook {
         }
 
         Map<String, String> titles = new HashMap<>();
-        if (navHref != null) readNavTitles(new File(contentDir, cleanHref(navHref)), contentDir, titles);
-        if (titles.isEmpty() && ncxHref != null) readNcxTitles(new File(contentDir, cleanHref(ncxHref)), contentDir, titles);
+        if (navHref != null) readNavTitles(new File(contentDir, hrefPath(navHref)), contentDir, titles);
+        if (titles.isEmpty() && ncxHref != null) readNcxTitles(new File(contentDir, hrefPath(ncxHref)), contentDir, titles);
 
         List<Chapter> chapters = new ArrayList<>();
         NodeList refs = packageDoc.getElementsByTagNameNS("*", "itemref");
@@ -123,7 +123,7 @@ final class EpubBook {
             String href = hrefById.get(id);
             String media = mediaById.get(id);
             if (href == null || !("application/xhtml+xml".equals(media) || "text/html".equals(media))) continue;
-            File chapterFile = new File(contentDir, cleanHref(href));
+            File chapterFile = new File(contentDir, hrefPath(href));
             String key = canonicalRelative(contentDir, chapterFile);
             String chapterTitle = titles.get(key);
             if (chapterTitle == null || chapterTitle.isEmpty()) chapterTitle = "Abschnitt " + (chapters.size() + 1);
@@ -141,7 +141,7 @@ final class EpubBook {
                 Element a = (Element) anchors.item(i);
                 String href = a.getAttribute("href");
                 if (href.isEmpty()) continue;
-                File file = new File(nav.getParentFile(), cleanHref(href));
+                File file = new File(nav.getParentFile(), hrefPath(href));
                 titles.put(canonicalRelative(contentDir, file), a.getTextContent().trim());
             }
         } catch (Exception ignored) { }
@@ -156,7 +156,7 @@ final class EpubBook {
                 Element content = child(point, "content");
                 Element label = child(point, "navLabel");
                 if (content == null || label == null) continue;
-                File file = new File(ncx.getParentFile(), cleanHref(content.getAttribute("src")));
+                File file = new File(ncx.getParentFile(), hrefPath(content.getAttribute("src")));
                 titles.put(canonicalRelative(contentDir, file), label.getTextContent().trim());
             }
         } catch (Exception ignored) { }
@@ -243,7 +243,18 @@ final class EpubBook {
         return null;
     }
 
-    private static String cleanHref(String href) {
+    int chapterIndex(Uri target) {
+        if (target == null || target.getPath() == null) return -1;
+        try {
+            File requested = new File(target.getPath()).getCanonicalFile();
+            for (int i = 0; i < chapters.size(); i++) {
+                if (chapters.get(i).file.getCanonicalFile().equals(requested)) return i;
+            }
+        } catch (Exception ignored) { }
+        return -1;
+    }
+
+    private static String hrefPath(String href) {
         int hash = href.indexOf('#');
         if (hash >= 0) href = href.substring(0, hash);
         int query = href.indexOf('?');

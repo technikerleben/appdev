@@ -45,6 +45,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -95,6 +96,18 @@ public class MainActivity extends Activity {
     private Button next;
     private Button bookmark;
     private Runnable pendingPositionSave;
+    private String pendingAnchor;
+    private final ArrayDeque<ReadingLocation> linkHistory = new ArrayDeque<>();
+
+    private static final class ReadingLocation {
+        final int chapter;
+        final float ratio;
+
+        ReadingLocation(int chapter, float ratio) {
+            this.chapter = chapter;
+            this.ratio = ratio;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle state) {
@@ -513,11 +526,17 @@ public class MainActivity extends Activity {
     }
 
     private void showChapter() {
+        showChapter(null);
+    }
+
+    private void showChapter(String anchor) {
         if (book == null) return;
         savePositionNow();
         try {
             EpubBook.Chapter item = book.chapters.get(chapter);
-            String base = item.file.getParentFile().toURI().toString();
+            pendingAnchor = anchor;
+            String base = item.file.toURI().toString();
+            if (anchor != null && !anchor.isEmpty()) base += "#" + Uri.encode(anchor);
             // EPUB-Kapitel sind häufig als XHTML deklariert, enthalten in der
             // Praxis aber kleine HTML-Unsauberkeiten. text/html rendert sie wie
             // ein normaler E-Book-Reader, statt eine XML-Fehlerseite anzuzeigen.
@@ -730,7 +749,12 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (webView.canGoBack()) webView.goBack();
+        if (!linkHistory.isEmpty()) {
+            ReadingLocation previousLocation = linkHistory.removeLast();
+            chapter = previousLocation.chapter;
+            restoreRatio = previousLocation.ratio;
+            showChapter();
+        } else if (webView.canGoBack()) webView.goBack();
         else super.onBackPressed();
     }
 
@@ -827,8 +851,31 @@ public class MainActivity extends Activity {
     private final class SafeClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-            String scheme = request.getUrl().getScheme();
-            return "http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme);
+            Uri target = request.getUrl();
+            String scheme = target.getScheme();
+            if ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)) {
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("Externen Link öffnen?")
+                        .setMessage(target.toString())
+                        .setPositiveButton("Im Browser öffnen", (dialog, which) -> {
+                            try { startActivity(new Intent(Intent.ACTION_VIEW, target)); }
+                            catch (Exception error) { Toast.makeText(MainActivity.this, "Kein Browser verfügbar.", Toast.LENGTH_LONG).show(); }
+                        })
+                        .setNegativeButton("Abbrechen", null)
+                        .show();
+                return true;
+            }
+            if ("file".equalsIgnoreCase(scheme) && book != null) {
+                int targetChapter = book.chapterIndex(target);
+                if (targetChapter >= 0) {
+                    linkHistory.addLast(new ReadingLocation(chapter, scrollRatio()));
+                    chapter = targetChapter;
+                    restoreRatio = 0f;
+                    showChapter(target.getFragment());
+                    return true;
+                }
+            }
+            return false;
         }
 
         @Override
@@ -845,9 +892,11 @@ public class MainActivity extends Activity {
             super.onPageFinished(view, url);
             final float ratio = restoreRatio;
             restoreRatio = 0f;
+            final boolean hasAnchor = pendingAnchor != null && !pendingAnchor.isEmpty();
+            pendingAnchor = null;
             view.postDelayed(() -> {
                 int range = Math.max(0, webView.scrollRange() - webView.getWidth());
-                webView.scrollTo(Math.round(range * ratio), 0);
+                if (!hasAnchor) webView.scrollTo(Math.round(range * ratio), 0);
                 // Nach dem Layout immer exakt auf die nächstgelegene Seite einrasten.
                 webView.showPage(webView.currentPage());
                 updateNavigation();
