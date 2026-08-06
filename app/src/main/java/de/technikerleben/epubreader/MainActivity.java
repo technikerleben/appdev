@@ -209,13 +209,13 @@ public class MainActivity extends Activity {
         titleView.setTextColor(Color.WHITE);
         titleView.setTextSize(17);
         titleView.setSingleLine(true);
-        titleView.setText("EPUB Reader");
+        titleView.setText(R.string.app_name);
         toolbar.addView(titleView, new LinearLayout.LayoutParams(0, dp(48), 1));
-        toolbar.addView(toolButton("Bibliothek", "▤", v -> showLibrary()));
-        toolbar.addView(toolButton("Morgenblatt aktualisieren", "☀", v -> refreshDigest(true)));
-        toolbar.addView(toolButton("Suchen", "⌕", v -> showSearch()));
-        toolbar.addView(toolButton("Darstellung", "Aa", v -> showReaderSettings()));
-        toolbar.addView(toolButton("Datei öffnen", "＋", v -> chooseBook()));
+        toolbar.addView(toolButton(getString(R.string.library), "▤", v -> showLibrary()));
+        toolbar.addView(toolButton(getString(R.string.refresh_digest), "☀", v -> refreshDigest(true)));
+        toolbar.addView(toolButton(getString(R.string.search), "⌕", v -> showSearch()));
+        toolbar.addView(toolButton(getString(R.string.appearance), "Aa", v -> showReaderSettings()));
+        toolbar.addView(toolButton(getString(R.string.open_file), "＋", v -> chooseBook()));
         root.addView(toolbar, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(56)));
 
         webView = new ReaderWebView();
@@ -241,18 +241,18 @@ public class MainActivity extends Activity {
         navigation.setGravity(Gravity.CENTER);
         navigation.setPadding(dp(6), dp(2), dp(6), dp(3));
         navigation.setBackgroundColor(Color.rgb(38, 54, 66));
-        previous = navButton("‹", "Vorheriges Kapitel", v -> moveChapter(-1));
+        previous = navButton("‹", getString(R.string.previous_chapter), v -> moveChapter(-1));
         navigation.addView(previous, new LinearLayout.LayoutParams(dp(54), dp(48)));
-        Button contents = navButton("☰", "Inhaltsverzeichnis", v -> showContents());
+        Button contents = navButton("☰", getString(R.string.contents), v -> showContents());
         navigation.addView(contents, new LinearLayout.LayoutParams(dp(54), dp(48)));
         positionView = new TextView(this);
         positionView.setGravity(Gravity.CENTER);
         positionView.setTextColor(Color.WHITE);
         positionView.setTextSize(13);
         navigation.addView(positionView, new LinearLayout.LayoutParams(0, dp(48), 1));
-        bookmark = navButton("☆", "Lesezeichen", v -> toggleBookmark());
+        bookmark = navButton("☆", getString(R.string.bookmark), v -> toggleBookmark());
         navigation.addView(bookmark, new LinearLayout.LayoutParams(dp(54), dp(48)));
-        next = navButton("›", "Nächstes Kapitel", v -> moveChapter(1));
+        next = navButton("›", getString(R.string.next_chapter), v -> moveChapter(1));
         navigation.addView(next, new LinearLayout.LayoutParams(dp(54), dp(48)));
         root.addView(navigation, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(54)));
         container.addView(root, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -320,9 +320,8 @@ public class MainActivity extends Activity {
         String html = "<!doctype html><html><meta name=viewport content='width=device-width,initial-scale=1'>" +
                 "<style>body{font-family:sans-serif;background:#F5F4F1;color:#263642;margin:28px;line-height:1.55}" +
                 ".mark{font-size:58px;margin-top:18vh}.button{color:#9E4E22;font-weight:bold}</style>" +
-                "<body><div class=mark>▤</div><h1>Deine EPUB-Bücher</h1>" +
-                "<p>Öffne über <span class=button>＋</span> eine EPUB-Datei auf deinem Smartphone. " +
-                "Das Buch bleibt lokal auf deinem Gerät.</p><p>Leseposition, Darstellung und Lesezeichen werden automatisch gespeichert.</p></body></html>";
+                "<body><div class=mark>▤</div><h1>" + getString(R.string.welcome_title) + "</h1><p>" +
+                android.text.TextUtils.htmlEncode(getString(R.string.welcome_text)).replace("\n", "<br>") + "</p></body></html>";
         webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null);
     }
 
@@ -344,7 +343,7 @@ public class MainActivity extends Activity {
         LinearLayout panel = new LinearLayout(this);
         panel.setOrientation(LinearLayout.VERTICAL);
         TextView hint = new TextView(this);
-        hint.setText(books.isEmpty() ? "Noch keine Bücher gelesen" : "Tippe zum Öffnen. Halte einen Eintrag gedrückt, um ihn zu entfernen.");
+        hint.setText(books.isEmpty() ? R.string.no_books : R.string.library_hint);
         hint.setTextColor(Color.DKGRAY);
         hint.setTextSize(14);
         hint.setPadding(dp(20), dp(12), dp(20), dp(8));
@@ -357,11 +356,11 @@ public class MainActivity extends Activity {
                 books.isEmpty() ? dp(40) : Math.min(dp(420), dp(72) * books.size())));
 
         AlertDialog library = new AlertDialog.Builder(this)
-                .setTitle("Bibliothek")
+                .setTitle(R.string.library)
                 .setView(panel)
-                .setPositiveButton("Morgenblatt", (dialog, which) -> refreshDigest(true))
-                .setNeutralButton("Datei hinzufügen", (dialog, which) -> chooseBook())
-                .setNegativeButton("Schließen", null)
+                .setPositiveButton(R.string.digest, (dialog, which) -> refreshDigest(true))
+                .setNeutralButton(R.string.add_file, (dialog, which) -> chooseBook())
+                .setNegativeButton(R.string.close, null)
                 .create();
         list.setOnItemClickListener((parent, view, position, id) -> {
             RecentBook selected = books.get(position);
@@ -377,15 +376,15 @@ public class MainActivity extends Activity {
         list.setOnItemLongClickListener((parent, view, position, id) -> {
             RecentBook selected = books.get(position);
             new AlertDialog.Builder(this)
-                    .setTitle("Aus Bibliothek entfernen?")
-                    .setMessage("„" + selected.title + "“ wird nur aus dieser Liste entfernt. Die EPUB-Datei bleibt erhalten.")
-                    .setPositiveButton("Entfernen", (dialog, which) -> {
+                    .setTitle(R.string.remove_from_library)
+                    .setMessage(getString(R.string.remove_book_message, selected.title))
+                    .setPositiveButton(R.string.remove, (dialog, which) -> {
                         books.remove(position);
                         saveRecentBooks(books);
                         library.dismiss();
                         showLibrary();
                     })
-                    .setNegativeButton("Abbrechen", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show();
             return true;
         });
@@ -398,7 +397,7 @@ public class MainActivity extends Activity {
             JSONArray array = new JSONArray(store.getString(RECENT_BOOKS, "[]"));
             for (int i = 0; i < array.length(); i++) {
                 JSONObject item = array.getJSONObject(i);
-                result.add(new RecentBook(item.getString("uri"), item.optString("title", "Unbenanntes Buch"),
+                result.add(new RecentBook(item.getString("uri"), item.optString("title", getString(R.string.untitled_book)),
                         item.optLong("lastRead", 0), item.optBoolean("digest", false), item.optString("author", ""),
                         item.optString("coverPath", ""), item.optInt("progress", 0)));
             }
@@ -499,7 +498,7 @@ public class MainActivity extends Activity {
             text.addView(title);
             TextView details = new TextView(MainActivity.this);
             String authorLine = item.author.isEmpty() ? "" : item.author + " · ";
-            details.setText(authorLine + item.progress + " %\nZuletzt: " + dateFormat.format(new Date(item.lastRead)));
+            details.setText(authorLine + item.progress + " %\n" + getString(R.string.last_read, dateFormat.format(new Date(item.lastRead))));
             details.setTextSize(12);
             text.addView(details);
             row.addView(text, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
@@ -519,15 +518,15 @@ public class MainActivity extends Activity {
     private void refreshDigest(boolean requestedByUser) {
         File digestDir = new File(getFilesDir(), "morgenblatt");
         File digestFile = new File(digestDir, "dailydigest.epub");
-        showLoading("Aktuelle Morgenblatt-Ausgabe wird geladen …");
+        showLoading(getString(R.string.loading_digest));
         worker.execute(() -> {
             File temporary = new File(digestDir, "dailydigest.tmp");
             try {
-                if (!digestDir.exists() && !digestDir.mkdirs()) throw new IllegalStateException("Speicherordner konnte nicht erstellt werden.");
+                if (!digestDir.exists() && !digestDir.mkdirs()) throw new IllegalStateException(getString(R.string.storage_folder_failed));
                 String feed = downloadText(DIGEST_FEED);
                 String epubUrl = findEpubUrl(feed);
                 downloadFile(epubUrl, temporary);
-                if (digestFile.exists() && !digestFile.delete()) throw new IllegalStateException("Alte Ausgabe konnte nicht ersetzt werden.");
+                if (digestFile.exists() && !digestFile.delete()) throw new IllegalStateException(getString(R.string.replace_issue_failed));
                 if (!temporary.renameTo(digestFile)) {
                     Files.copy(temporary.toPath(), digestFile.toPath());
                     temporary.delete();
@@ -542,15 +541,15 @@ public class MainActivity extends Activity {
                 runOnUiThreadIfAlive(() -> {
                     hideLoading();
                     if (digestFile.isFile()) {
-                        if (requestedByUser) Toast.makeText(this, "Keine neue Ausgabe erreichbar – gespeicherte Ausgabe wird geöffnet.", Toast.LENGTH_LONG).show();
+                        if (requestedByUser) Toast.makeText(this, R.string.digest_offline, Toast.LENGTH_LONG).show();
                         store.edit().putBoolean("last_is_digest", true).apply();
                         openBook(Uri.fromFile(digestFile), 0);
                     } else {
                         new AlertDialog.Builder(this)
-                                .setTitle("Morgenblatt nicht erreichbar")
+                                .setTitle(R.string.digest_unavailable)
                                 .setMessage(friendly(error))
-                                .setPositiveButton("Erneut versuchen", (alert, which) -> refreshDigest(true))
-                                .setNegativeButton("Schließen", null)
+                                .setPositiveButton(R.string.retry, (alert, which) -> refreshDigest(true))
+                                .setNegativeButton(R.string.close, null)
                                 .show();
                         if (book == null) showWelcome();
                     }
@@ -577,10 +576,10 @@ public class MainActivity extends Activity {
             long total = 0;
             while ((read = input.read(buffer)) != -1) {
                 total += read;
-                if (total > 100L * 1024L * 1024L) throw new IllegalArgumentException("Die EPUB-Datei ist unerwartet groß.");
+                if (total > 100L * 1024L * 1024L) throw new IllegalArgumentException(getString(R.string.epub_too_large));
                 output.write(buffer, 0, read);
             }
-            if (total == 0) throw new IllegalArgumentException("Die heruntergeladene EPUB-Datei ist leer.");
+            if (total == 0) throw new IllegalArgumentException(getString(R.string.download_empty));
         } finally {
             connection.disconnect();
         }
@@ -589,7 +588,7 @@ public class MainActivity extends Activity {
     private HttpURLConnection openConnection(String address) throws Exception {
         URL url = new URL(address);
         if (!"https".equalsIgnoreCase(url.getProtocol()) || !"technikerleben.github.io".equalsIgnoreCase(url.getHost())) {
-            throw new SecurityException("Der Feed verweist auf eine nicht erlaubte Downloadadresse.");
+            throw new SecurityException(getString(R.string.feed_address_blocked));
         }
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setConnectTimeout(12_000);
@@ -599,7 +598,7 @@ public class MainActivity extends Activity {
         int status = connection.getResponseCode();
         if (status < 200 || status >= 300) {
             connection.disconnect();
-            throw new IllegalStateException("Der Server antwortet mit HTTP " + status + ".");
+            throw new IllegalStateException(getString(R.string.server_status, status));
         }
         return connection;
     }
@@ -609,7 +608,7 @@ public class MainActivity extends Activity {
         byte[] buffer = new byte[8192];
         int read;
         while ((read = input.read(buffer)) != -1) {
-            if (output.size() + read > maximum) throw new IllegalArgumentException("Der OPDS-Feed ist unerwartet groß.");
+            if (output.size() + read > maximum) throw new IllegalArgumentException(getString(R.string.feed_too_large));
             output.write(buffer, 0, read);
         }
         return output.toByteArray();
@@ -623,7 +622,7 @@ public class MainActivity extends Activity {
             String href = attribute(tag, "href");
             if ("application/epub+zip".equalsIgnoreCase(type) && href != null) return href.replace("&amp;", "&");
         }
-        throw new IllegalArgumentException("Im OPDS-Feed wurde keine EPUB-Ausgabe gefunden.");
+        throw new IllegalArgumentException(getString(R.string.feed_no_epub));
     }
 
     private String attribute(String tag, String name) {
@@ -637,7 +636,7 @@ public class MainActivity extends Activity {
             try { getContentResolver().takePersistableUriPermission(uri, takeFlags); }
             catch (SecurityException ignored) { }
         }
-        showLoading("EPUB wird geöffnet …");
+        showLoading(getString(R.string.loading_epub));
         worker.execute(() -> {
             try {
                 EpubBook opened = EpubBook.open(this, uri);
@@ -660,10 +659,10 @@ public class MainActivity extends Activity {
                 runOnUiThreadIfAlive(() -> {
                     hideLoading();
                     new AlertDialog.Builder(this)
-                            .setTitle("EPUB konnte nicht geöffnet werden")
+                            .setTitle(R.string.epub_open_failed)
                             .setMessage(friendly(error))
-                            .setPositiveButton("Andere Datei wählen", (alert, which) -> chooseBook())
-                            .setNegativeButton("Schließen", null)
+                            .setPositiveButton(R.string.choose_other_file, (alert, which) -> chooseBook())
+                            .setNegativeButton(R.string.close, null)
                             .show();
                     if (book == null) showWelcome();
                 });
@@ -675,7 +674,7 @@ public class MainActivity extends Activity {
         Throwable cause = error;
         while (cause.getCause() != null) cause = cause.getCause();
         String message = cause.getMessage();
-        return message == null || message.trim().isEmpty() ? "unbekanntes Dateiformat" : message;
+        return message == null || message.trim().isEmpty() ? getString(R.string.unknown_format) : message;
     }
 
     private void showChapter() {
@@ -696,7 +695,7 @@ public class MainActivity extends Activity {
             webView.loadDataWithBaseURL(base, book.html(chapter, readerPreferences), "text/html", "UTF-8", null);
             updateNavigation();
         } catch (Exception error) {
-            Toast.makeText(this, "Kapitel konnte nicht angezeigt werden.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.chapter_display_failed, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -717,12 +716,12 @@ public class MainActivity extends Activity {
         previous.setAlpha(previous.isEnabled() ? 1f : .3f);
         next.setAlpha(next.isEnabled() ? 1f : .3f);
         if (!ready) {
-            positionView.setText("Noch kein Buch geöffnet");
+            positionView.setText(R.string.no_book_open);
             bookmark.setText("☆");
             return;
         }
-        positionView.setText((chapter + 1) + " / " + book.chapters.size() + "  ·  Seite " +
-                (webView.currentPage() + 1) + " / " + webView.pageCount() + "\n" + book.chapters.get(chapter).title);
+        positionView.setText(getString(R.string.reading_position, chapter + 1, book.chapters.size(),
+                webView.currentPage() + 1, webView.pageCount(), book.chapters.get(chapter).title));
         bookmark.setText(bookmarks().contains(chapter) ? "★" : "☆");
         updateProgress();
     }
@@ -739,7 +738,7 @@ public class MainActivity extends Activity {
         }
         ListView list = new ListView(this);
         list.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, rows));
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle("Inhaltsverzeichnis").setView(list).setNegativeButton("Schließen", null).create();
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.contents).setView(list).setNegativeButton(R.string.close, null).create();
         list.setSelection(chapter);
         list.setOnItemClickListener((parent, view, position, id) -> {
             savePositionNow();
@@ -774,14 +773,14 @@ public class MainActivity extends Activity {
         if (book == null) return;
         EditText input = new EditText(this);
         input.setSingleLine(true);
-        input.setHint("Wort oder Ausdruck im Buch");
+        input.setHint(R.string.search_hint);
         input.setPadding(dp(20), dp(4), dp(20), dp(4));
         new AlertDialog.Builder(this)
-                .setTitle("Im Buch suchen")
+                .setTitle(R.string.search_book)
                 .setView(input)
-                .setPositiveButton("Suchen", (dialog, which) -> searchBook(input.getText().toString().trim()))
-                .setNeutralButton("Markierungen löschen", (dialog, which) -> webView.clearMatches())
-                .setNegativeButton("Abbrechen", null)
+                .setPositiveButton(R.string.search, (dialog, which) -> searchBook(input.getText().toString().trim()))
+                .setNeutralButton(R.string.clear_highlights, (dialog, which) -> webView.clearMatches())
+                .setNegativeButton(R.string.cancel, null)
                 .show();
     }
 
@@ -794,13 +793,13 @@ public class MainActivity extends Activity {
         panel.setPadding(dp(24), dp(18), dp(24), dp(18));
         panel.addView(new ProgressBar(this), new LinearLayout.LayoutParams(dp(44), dp(44)));
         TextView message = new TextView(this);
-        message.setText("Alle Kapitel werden durchsucht …");
+        message.setText(R.string.searching_all);
         message.setPadding(dp(16), 0, 0, 0);
         panel.addView(message);
         AlertDialog waiting = new AlertDialog.Builder(this)
-                .setTitle("Suche")
+                .setTitle(R.string.search)
                 .setView(panel)
-                .setNegativeButton("Abbrechen", (dialog, which) -> cancelled.set(true))
+                .setNegativeButton(R.string.cancel, (dialog, which) -> cancelled.set(true))
                 .create();
         waiting.setOnCancelListener(dialog -> cancelled.set(true));
         waiting.show();
@@ -815,7 +814,7 @@ public class MainActivity extends Activity {
             } catch (Exception error) {
                 runOnUiThreadIfAlive(() -> {
                     waiting.dismiss();
-                    if (!cancelled.get()) Toast.makeText(this, "Das Buch konnte nicht vollständig durchsucht werden.", Toast.LENGTH_LONG).show();
+                    if (!cancelled.get()) Toast.makeText(this, R.string.search_failed, Toast.LENGTH_LONG).show();
                 });
             }
         });
@@ -823,7 +822,7 @@ public class MainActivity extends Activity {
 
     private void showSearchResults(String query, List<EpubBook.SearchResult> results) {
         if (results.isEmpty()) {
-            new AlertDialog.Builder(this).setTitle("Keine Treffer").setMessage("„" + query + "“ wurde im Buch nicht gefunden.")
+            new AlertDialog.Builder(this).setTitle(R.string.no_results).setMessage(getString(R.string.query_not_found, query))
                     .setPositiveButton("OK", null).show();
             return;
         }
@@ -831,8 +830,8 @@ public class MainActivity extends Activity {
         for (EpubBook.SearchResult result : results) rows.add(result.chapterTitle + "\n" + result.snippet);
         ListView list = new ListView(this);
         list.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_2, android.R.id.text1, rows));
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(results.size() + " Treffer")
-                .setView(list).setNegativeButton("Schließen", null).create();
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(getResources().getQuantityString(R.plurals.result_count, results.size(), results.size()))
+                .setView(list).setNegativeButton(R.string.close, null).create();
         list.setOnItemClickListener((parent, view, position, id) -> {
             EpubBook.SearchResult result = results.get(position);
             linkHistory.addLast(new ReadingLocation(chapter, scrollRatio()));
@@ -850,39 +849,39 @@ public class MainActivity extends Activity {
         panel.setOrientation(LinearLayout.VERTICAL);
         panel.setPadding(dp(22), dp(4), dp(22), 0);
 
-        TextView fontSizeLabel = label(panel, "Schriftgröße: " + readerPreferences.fontSize + " px");
+        TextView fontSizeLabel = label(panel, getString(R.string.font_size, readerPreferences.fontSize));
         SeekBar fontSize = seek(panel, readerPreferences.fontSize - 14, 20);
-        fontSize.setOnSeekBarChangeListener(listener(value -> fontSizeLabel.setText("Schriftgröße: " + (value + 14) + " px")));
+        fontSize.setOnSeekBarChangeListener(listener(value -> fontSizeLabel.setText(getString(R.string.font_size, value + 14))));
 
-        TextView lineLabel = label(panel, "Zeilenabstand: " + String.format(java.util.Locale.GERMANY, "%.1f", readerPreferences.lineHeight));
+        TextView lineLabel = label(panel, getString(R.string.line_height, readerPreferences.lineHeight));
         SeekBar line = seek(panel, Math.round((readerPreferences.lineHeight - 1.2f) * 10), 10);
-        line.setOnSeekBarChangeListener(listener(value -> lineLabel.setText("Zeilenabstand: " + String.format(java.util.Locale.GERMANY, "%.1f", 1.2f + value / 10f))));
+        line.setOnSeekBarChangeListener(listener(value -> lineLabel.setText(getString(R.string.line_height, 1.2f + value / 10f))));
 
-        TextView marginLabel = label(panel, "Seitenrand: " + readerPreferences.margin + " px");
+        TextView marginLabel = label(panel, getString(R.string.margin, readerPreferences.margin));
         SeekBar margin = seek(panel, readerPreferences.margin - 8, 32);
-        margin.setOnSeekBarChangeListener(listener(value -> marginLabel.setText("Seitenrand: " + (value + 8) + " px")));
+        margin.setOnSeekBarChangeListener(listener(value -> marginLabel.setText(getString(R.string.margin, value + 8))));
 
-        label(panel, "Schriftart");
-        Spinner fonts = spinner(panel, new String[]{"Buchschrift (Serif)", "Klare Schrift", "Monospace", "Schmal"}, readerPreferences.font);
-        label(panel, "Hintergrund");
-        Spinner themes = spinner(panel, new String[]{"Warmweiß", "Reinweiß", "Sepia", "Dunkel", "Schwarz"}, readerPreferences.theme);
+        label(panel, getString(R.string.font_family));
+        Spinner fonts = spinner(panel, getResources().getStringArray(R.array.font_choices), readerPreferences.font);
+        label(panel, getString(R.string.background));
+        Spinner themes = spinner(panel, getResources().getStringArray(R.array.theme_choices), readerPreferences.theme);
 
         Switch keepScreenOn = new Switch(this);
-        keepScreenOn.setText("Bildschirm beim Lesen eingeschaltet lassen");
+        keepScreenOn.setText(R.string.keep_screen_on);
         keepScreenOn.setChecked(readerPreferences.keepScreenOn);
         keepScreenOn.setMinHeight(dp(48));
         panel.addView(keepScreenOn, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         Switch volumeKeys = new Switch(this);
-        volumeKeys.setText("Mit Lautstärketasten blättern");
+        volumeKeys.setText(R.string.volume_keys);
         volumeKeys.setChecked(readerPreferences.volumeKeys);
         volumeKeys.setMinHeight(dp(48));
         panel.addView(volumeKeys, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         new AlertDialog.Builder(this)
-                .setTitle("Darstellung")
+                .setTitle(R.string.appearance)
                 .setView(panel)
-                .setPositiveButton("Übernehmen", (dialog, which) -> {
+                .setPositiveButton(R.string.apply, (dialog, which) -> {
                     savePositionNow();
                     restoreRatio = scrollRatio();
                     readerPreferences.fontSize = fontSize.getProgress() + 14;
@@ -896,7 +895,7 @@ public class MainActivity extends Activity {
                     applyReaderWindowFlags();
                     if (book != null) showChapter();
                 })
-                .setNegativeButton("Abbrechen", null)
+                .setNegativeButton(R.string.cancel, null)
                 .show();
     }
 
@@ -957,7 +956,7 @@ public class MainActivity extends Activity {
         SeekBar seek = new SeekBar(this);
         seek.setMax(max);
         seek.setProgress(progress);
-        seek.setContentDescription("Einstellwert");
+        seek.setContentDescription(getString(R.string.setting_value));
         panel.addView(seek, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(42)));
         return seek;
     }
@@ -1185,13 +1184,13 @@ public class MainActivity extends Activity {
             String scheme = target.getScheme();
             if ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)) {
                 new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("Externen Link öffnen?")
+                        .setTitle(R.string.external_link_title)
                         .setMessage(target.toString())
-                        .setPositiveButton("Im Browser öffnen", (dialog, which) -> {
+                        .setPositiveButton(R.string.open_in_browser, (dialog, which) -> {
                             try { startActivity(new Intent(Intent.ACTION_VIEW, target)); }
-                            catch (Exception error) { Toast.makeText(MainActivity.this, "Kein Browser verfügbar.", Toast.LENGTH_LONG).show(); }
+                            catch (Exception error) { Toast.makeText(MainActivity.this, R.string.browser_missing, Toast.LENGTH_LONG).show(); }
                         })
-                        .setNegativeButton("Abbrechen", null)
+                        .setNegativeButton(R.string.cancel, null)
                         .show();
                 return true;
             }

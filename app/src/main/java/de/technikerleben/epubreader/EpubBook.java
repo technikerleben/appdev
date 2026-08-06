@@ -71,10 +71,10 @@ final class EpubBook {
         File root = new File(context.getCacheDir(), "books/" + Integer.toHexString(uri.toString().hashCode()));
         cleanupBookCache(root.getParentFile(), root);
         deleteTree(root);
-        if (!root.mkdirs()) throw new IllegalStateException("Temporärer Buchordner konnte nicht erstellt werden.");
+        if (!root.mkdirs()) throw new IllegalStateException(context.getString(R.string.book_cache_failed));
 
         InputStream source = context.getContentResolver().openInputStream(uri);
-        if (source == null) throw new IllegalArgumentException("Android hat keinen Lesezugriff auf die ausgewählte Datei gewährt.");
+        if (source == null) throw new IllegalArgumentException(context.getString(R.string.file_access_denied));
         int extractedFiles = 0;
         try (InputStream input = source; ZipInputStream zip = new ZipInputStream(input)) {
             ZipEntry entry;
@@ -83,7 +83,7 @@ final class EpubBook {
             while ((entry = zip.getNextEntry()) != null) {
                 File target = new File(root, entry.getName());
                 if (!target.getCanonicalPath().startsWith(rootPath)) {
-                    throw new SecurityException("Ungültiger Dateipfad im EPUB.");
+                    throw new SecurityException(context.getString(R.string.invalid_epub_path));
                 }
                 if (entry.isDirectory()) {
                     target.mkdirs();
@@ -101,25 +101,25 @@ final class EpubBook {
         }
 
         if (extractedFiles == 0) {
-            throw new IllegalArgumentException("Die ausgewählte Datei ist kein gültiges EPUB-Archiv.");
+            throw new IllegalArgumentException(context.getString(R.string.invalid_epub_archive));
         }
         root.setLastModified(System.currentTimeMillis());
         cleanupBookCache(root.getParentFile(), root);
 
         File containerFile = findIgnoreCase(root, "META-INF/container.xml");
         if (containerFile == null) {
-            throw new IllegalArgumentException("Die EPUB-Struktur META-INF/container.xml fehlt.");
+            throw new IllegalArgumentException(context.getString(R.string.missing_container));
         }
         Document container = parseXml(containerFile);
         Element rootFile = first(container, "rootfile");
-        if (rootFile == null) throw new IllegalArgumentException("Kein EPUB-Inhalt gefunden.");
+        if (rootFile == null) throw new IllegalArgumentException(context.getString(R.string.missing_content));
         File opf = new File(root, Uri.decode(rootFile.getAttribute("full-path")));
-        if (!opf.isFile()) throw new IllegalArgumentException("Die Inhaltsdatei des EPUBs fehlt.");
+        if (!opf.isFile()) throw new IllegalArgumentException(context.getString(R.string.missing_opf));
         Document packageDoc = parseXml(opf);
         File contentDir = opf.getParentFile();
 
         String bookTitle = textOfFirst(packageDoc, "title");
-        if (bookTitle == null || bookTitle.trim().isEmpty()) bookTitle = "Unbenanntes Buch";
+        if (bookTitle == null || bookTitle.trim().isEmpty()) bookTitle = context.getString(R.string.untitled_book);
         String bookAuthor = textOfFirst(packageDoc, "creator");
         if (bookAuthor == null) bookAuthor = "";
 
@@ -164,10 +164,10 @@ final class EpubBook {
             File chapterFile = new File(contentDir, hrefPath(href));
             String key = canonicalRelative(contentDir, chapterFile);
             String chapterTitle = titles.get(key);
-            if (chapterTitle == null || chapterTitle.isEmpty()) chapterTitle = "Abschnitt " + (chapters.size() + 1);
+            if (chapterTitle == null || chapterTitle.isEmpty()) chapterTitle = context.getString(R.string.section_number, chapters.size() + 1);
             chapters.add(new Chapter(chapterTitle, chapterFile, depths.getOrDefault(key, 0)));
         }
-        if (chapters.isEmpty()) throw new IllegalArgumentException("Das EPUB enthält keine lesbaren Kapitel.");
+        if (chapters.isEmpty()) throw new IllegalArgumentException(context.getString(R.string.no_chapters));
         File coverFile = coverHref == null ? null : new File(contentDir, hrefPath(coverHref));
         if (coverFile != null && !coverFile.isFile()) coverFile = null;
         return new EpubBook(bookTitle.trim(), bookAuthor.trim(), coverFile, chapters);
