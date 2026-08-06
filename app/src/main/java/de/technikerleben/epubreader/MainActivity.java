@@ -101,17 +101,40 @@ public class MainActivity extends Activity {
         readerPreferences = ReaderPreferences.load(store);
         buildUi();
 
-        Uri incoming = getIntent().getData();
-        if (incoming != null) {
-            store.edit().putBoolean("last_is_digest", false).apply();
-            openBook(incoming, getIntent().getFlags());
-        } else if (store.getBoolean("last_is_digest", false)) {
+        if (handleIncomingIntent(getIntent())) {
+            return;
+        }
+        if (store.getBoolean("last_is_digest", false)) {
             refreshDigest(false);
         } else {
             String last = store.getString("last_uri", null);
             if (last != null) openBook(Uri.parse(last), 0);
             else showWelcome();
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIncomingIntent(intent);
+    }
+
+    private boolean handleIncomingIntent(Intent intent) {
+        if (intent == null) return false;
+        Uri incoming = intent.getData();
+        if (Intent.ACTION_SEND.equals(intent.getAction())) {
+            if (android.os.Build.VERSION.SDK_INT >= 33) {
+                incoming = intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri.class);
+            } else {
+                //noinspection deprecation
+                incoming = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+            }
+        }
+        if (incoming == null) return false;
+        store.edit().putBoolean("last_is_digest", false).apply();
+        openBook(incoming, intent.getFlags());
+        return true;
     }
 
     private void buildUi() {
