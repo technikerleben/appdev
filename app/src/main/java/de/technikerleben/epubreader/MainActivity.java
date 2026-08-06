@@ -14,7 +14,6 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -101,7 +100,6 @@ public class MainActivity extends Activity {
         store = getSharedPreferences("reader", MODE_PRIVATE);
         readerPreferences = ReaderPreferences.load(store);
         buildUi();
-        applyBrightness();
 
         Uri incoming = getIntent().getData();
         if (incoming != null) {
@@ -604,10 +602,6 @@ public class MainActivity extends Activity {
         SeekBar margin = seek(panel, readerPreferences.margin - 8, 32);
         margin.setOnSeekBarChangeListener(listener(value -> marginLabel.setText("Seitenrand: " + (value + 8) + " px")));
 
-        TextView brightnessLabel = label(panel, "Helligkeit: " + readerPreferences.brightness + " %");
-        SeekBar brightness = seek(panel, readerPreferences.brightness - 10, 90);
-        brightness.setOnSeekBarChangeListener(listener(value -> brightnessLabel.setText("Helligkeit: " + (value + 10) + " %")));
-
         label(panel, "Schriftart");
         Spinner fonts = spinner(panel, new String[]{"Buchschrift (Serif)", "Klare Schrift", "Monospace", "Schmal"}, readerPreferences.font);
         label(panel, "Hintergrund");
@@ -622,11 +616,9 @@ public class MainActivity extends Activity {
                     readerPreferences.fontSize = fontSize.getProgress() + 14;
                     readerPreferences.lineHeight = 1.2f + line.getProgress() / 10f;
                     readerPreferences.margin = margin.getProgress() + 8;
-                    readerPreferences.brightness = brightness.getProgress() + 10;
                     readerPreferences.font = fonts.getSelectedItemPosition();
                     readerPreferences.theme = themes.getSelectedItemPosition();
                     readerPreferences.save(store);
-                    applyBrightness();
                     if (book != null) showChapter();
                 })
                 .setNegativeButton("Abbrechen", null)
@@ -666,12 +658,6 @@ public class MainActivity extends Activity {
             public void onStartTrackingTouch(SeekBar seekBar) { }
             public void onStopTrackingTouch(SeekBar seekBar) { }
         };
-    }
-
-    private void applyBrightness() {
-        WindowManager.LayoutParams params = getWindow().getAttributes();
-        params.screenBrightness = readerPreferences.brightness / 100f;
-        getWindow().setAttributes(params);
     }
 
     private String bookKey() {
