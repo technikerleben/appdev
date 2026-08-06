@@ -24,6 +24,10 @@ android {
     namespace 'de.technikerleben.epubreader'
     compileSdk 35
 
+    buildFeatures {
+        buildConfig true
+    }
+
     defaultConfig {
         applicationId 'de.technikerleben.epubreader'
         minSdk 26
