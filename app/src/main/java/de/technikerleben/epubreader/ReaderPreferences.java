@@ -8,10 +8,14 @@ final class ReaderPreferences {
     float lineHeight;
     int theme;
     int font;
+    boolean keepScreenOn;
+    boolean volumeKeys;
+    boolean publisherLayout;
     String background;
     String foreground;
     String link;
     String fontFamily;
+    float systemFontScale = 1f;
 
     static ReaderPreferences load(SharedPreferences preferences) {
         ReaderPreferences result = new ReaderPreferences();
@@ -20,6 +24,9 @@ final class ReaderPreferences {
         result.lineHeight = preferences.getFloat("line_height", 1.6f);
         result.theme = preferences.getInt("theme", 0);
         result.font = preferences.getInt("font", 0);
+        result.keepScreenOn = preferences.getBoolean("keep_screen_on", false);
+        result.volumeKeys = preferences.getBoolean("volume_keys", false);
+        result.publisherLayout = preferences.getBoolean("publisher_layout", false);
         result.resolve();
         return result;
     }
@@ -31,6 +38,9 @@ final class ReaderPreferences {
                 .putFloat("line_height", lineHeight)
                 .putInt("theme", theme)
                 .putInt("font", font)
+                .putBoolean("keep_screen_on", keepScreenOn)
+                .putBoolean("volume_keys", volumeKeys)
+                .putBoolean("publisher_layout", publisherLayout)
                 .apply();
         resolve();
     }

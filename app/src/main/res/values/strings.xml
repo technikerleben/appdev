@@ -1,3 +1,61 @@
 <resources>
     <string name="app_name">EPUB Reader</string>
+    <string name="library">Bibliothek</string>
+    <string name="refresh_digest">Morgenblatt aktualisieren</string>
+    <string name="search">Suchen</string>
+    <string name="appearance">Darstellung</string>
+    <string name="open_file">Datei öffnen</string>
+    <string name="previous_chapter">Vorheriges Kapitel</string>
+    <string name="contents">Inhaltsverzeichnis</string>
+    <string name="bookmark">Lesezeichen</string>
+    <string name="next_chapter">Nächstes Kapitel</string>
+    <string name="welcome_title">Deine EPUB-Bücher</string>
+    <string name="welcome_text">Öffne über ＋ eine EPUB-Datei auf deinem Smartphone. Das Buch bleibt lokal auf deinem Gerät.\n\nLeseposition, Darstellung und Lesezeichen werden automatisch gespeichert.</string>
+    <string name="no_books">Noch keine Bücher gelesen</string>
+    <string name="library_hint">Tippe zum Öffnen. Halte einen Eintrag gedrückt, um ihn zu entfernen.</string>
+    <string name="digest">Morgenblatt</string>
+    <string name="add_file">Datei hinzufügen</string>
+    <string name="close">Schließen</string>
+    <string name="remove_from_library">Aus Bibliothek entfernen?</string>
+    <string name="remove_book_message">„%1$s“ wird nur aus dieser Liste entfernt. Die EPUB-Datei bleibt erhalten.</string>
+    <string name="remove">Entfernen</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="last_read">Zuletzt: %1$s</string>
+    <string name="loading_digest">Aktuelle Morgenblatt-Ausgabe wird geladen …</string>
+    <string name="digest_offline">Keine neue Ausgabe erreichbar – gespeicherte Ausgabe wird geöffnet.</string>
+    <string name="digest_unavailable">Morgenblatt nicht erreichbar</string>
+    <string name="retry">Erneut versuchen</string>
+    <string name="loading_epub">EPUB wird geöffnet …</string>
+    <string name="epub_open_failed">EPUB konnte nicht geöffnet werden</string>
+    <string name="choose_other_file">Andere Datei wählen</string>
+    <string name="unknown_format">Unbekanntes Dateiformat</string>
+    <string name="chapter_display_failed">Kapitel konnte nicht angezeigt werden.</string>
+    <string name="no_book_open">Noch kein Buch geöffnet</string>
+    <string name="reading_position">%1$d / %2$d · Seite %3$d / %4$d\n%5$s</string>
+    <string name="search_hint">Wort oder Ausdruck im Buch</string>
+    <string name="search_book">Im Buch suchen</string>
+    <string name="clear_highlights">Markierungen löschen</string>
+    <string name="searching_all">Alle Kapitel werden durchsucht …</string>
+    <string name="search_failed">Das Buch konnte nicht vollständig durchsucht werden.</string>
+    <string name="no_results">Keine Treffer</string>
+    <string name="query_not_found">„%1$s“ wurde im Buch nicht gefunden.</string>
+    <plurals name="result_count"><item quantity="one">Ein Treffer</item><item quantity="other">%d Treffer</item></plurals>
+    <string name="font_size">Schriftgröße: %1$d px</string>
+    <string name="line_height">Zeilenabstand: %1$.1f</string>
+    <string name="margin">Seitenrand: %1$d px</string>
+    <string name="font_family">Schriftart</string>
+    <string-array name="font_choices"><item>Buchschrift (Serif)</item><item>Klare Schrift</item><item>Monospace</item><item>Schmal</item></string-array>
+    <string name="background">Hintergrund</string>
+    <string-array name="theme_choices"><item>Warmweiß</item><item>Reinweiß</item><item>Sepia</item><item>Dunkel</item><item>Schwarz</item></string-array>
+    <string name="keep_screen_on">Bildschirm beim Lesen eingeschaltet lassen</string>
+    <string name="volume_keys">Mit Lautstärketasten blättern</string>
+    <string name="publisher_layout">Layout des Buchs beibehalten</string>
+    <string name="apply">Übernehmen</string>
+    <string name="setting_value">Einstellwert</string>
+    <string name="external_link_title">Externen Link öffnen?</string>
+    <string name="open_in_browser">Im Browser öffnen</string>
+    <string name="browser_missing">Kein Browser verfügbar.</string>
+    <string name="untitled_book">Unbenanntes Buch</string><string name="section_number">Abschnitt %1$d</string>
+    <string name="book_cache_failed">Temporärer Buchordner konnte nicht erstellt werden.</string><string name="file_access_denied">Android hat keinen Lesezugriff auf die ausgewählte Datei gewährt.</string><string name="invalid_epub_path">Ungültiger Dateipfad im EPUB.</string><string name="invalid_epub_archive">Die ausgewählte Datei ist kein gültiges EPUB-Archiv.</string><string name="missing_container">Die EPUB-Struktur META-INF/container.xml fehlt.</string><string name="missing_content">Kein EPUB-Inhalt gefunden.</string><string name="missing_opf">Die Inhaltsdatei des EPUBs fehlt.</string><string name="no_chapters">Das EPUB enthält keine lesbaren Kapitel.</string>
+    <string name="storage_folder_failed">Speicherordner konnte nicht erstellt werden.</string><string name="replace_issue_failed">Alte Ausgabe konnte nicht ersetzt werden.</string><string name="epub_too_large">Die EPUB-Datei ist unerwartet groß.</string><string name="download_empty">Die heruntergeladene EPUB-Datei ist leer.</string><string name="feed_address_blocked">Der Feed verweist auf eine nicht erlaubte Downloadadresse.</string><string name="server_status">Der Server antwortet mit HTTP %1$d.</string><string name="feed_too_large">Der OPDS-Feed ist unerwartet groß.</string><string name="feed_no_epub">Im OPDS-Feed wurde keine EPUB-Ausgabe gefunden.</string>
 </resources>
