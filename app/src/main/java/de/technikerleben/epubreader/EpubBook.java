@@ -16,6 +16,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -47,6 +49,7 @@ final class EpubBook {
 
     static EpubBook open(Context context, Uri uri) throws Exception {
         File root = new File(context.getCacheDir(), "books/" + Integer.toHexString(uri.toString().hashCode()));
+        cleanupBookCache(root.getParentFile(), root);
         deleteTree(root);
         if (!root.mkdirs()) throw new IllegalStateException("Temporärer Buchordner konnte nicht erstellt werden.");
 
@@ -80,6 +83,8 @@ final class EpubBook {
         if (extractedFiles == 0) {
             throw new IllegalArgumentException("Die ausgewählte Datei ist kein gültiges EPUB-Archiv.");
         }
+        root.setLastModified(System.currentTimeMillis());
+        cleanupBookCache(root.getParentFile(), root);
 
         File containerFile = findIgnoreCase(root, "META-INF/container.xml");
         if (containerFile == null) {
@@ -303,5 +308,34 @@ final class EpubBook {
         File[] children = file.listFiles();
         if (children != null) for (File child : children) deleteTree(child);
         file.delete();
+    }
+
+    private static void cleanupBookCache(File booksDirectory, File protectedDirectory) {
+        if (booksDirectory == null || !booksDirectory.isDirectory()) return;
+        File[] directories = booksDirectory.listFiles(File::isDirectory);
+        if (directories == null) return;
+        Arrays.sort(directories, Comparator.comparingLong(File::lastModified).reversed());
+        long retainedBytes = 0L;
+        int retained = 0;
+        final long limit = 200L * 1024L * 1024L;
+        for (File directory : directories) {
+            long bytes = directorySize(directory);
+            boolean current = protectedDirectory != null && directory.equals(protectedDirectory);
+            boolean keep = current || (retained < 2 && retainedBytes + bytes <= limit);
+            if (keep) {
+                retained++;
+                retainedBytes += bytes;
+            } else {
+                deleteTree(directory);
+            }
+        }
+    }
+
+    private static long directorySize(File file) {
+        if (file.isFile()) return file.length();
+        long total = 0L;
+        File[] children = file.listFiles();
+        if (children != null) for (File child : children) total += directorySize(child);
+        return total;
     }
 }
