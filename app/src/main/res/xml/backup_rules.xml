@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Lesepositionen, Bibliothek und Darstellungseinstellungen. -->
+    <include domain="sharedpref" path="." />
+    <!-- Cache-Verzeichnisse werden vom Android-Backup grundsätzlich ausgelassen. -->
+    <exclude domain="file" path="morgenblatt/" />
+</full-backup-content>
