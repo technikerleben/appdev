@@ -218,9 +218,9 @@ final class EpubBook {
 
     String html(int index, ReaderPreferences preferences) throws Exception {
         String source = decodeText(Files.readAllBytes(chapters.get(index).file.toPath()));
-        source = source.replaceAll("(?is)<script\\b[^>]*>.*?</script>", "")
-                .replaceAll("(?is)<iframe\\b[^>]*>.*?</iframe>", "")
-                .replaceAll("(?i)\\son[a-z]+\\s*=\\s*(['\"]).*?\\1", "");
+        // Markup bleibt unverändert: JavaScript ist im WebView abgeschaltet und
+        // externe Ressourcen werden vom SafeClient blockiert. Regex-Sanitizing
+        // würde dagegen gültige Gedichte, Codebeispiele oder Attribute zerstören.
         int pageGap = preferences.margin * 2;
         int effectiveFontSize = Math.round(preferences.fontSize * preferences.systemFontScale);
         String bodyTypography = preferences.publisherLayout ? "" :
