@@ -2,6 +2,5 @@
 <full-backup-content>
     <!-- Lesepositionen, Bibliothek und Darstellungseinstellungen. -->
     <include domain="sharedpref" path="." />
-    <!-- Cache-Verzeichnisse werden vom Android-Backup grundsätzlich ausgelassen. -->
-    <exclude domain="file" path="morgenblatt/" />
+    <!-- Durch die Whitelist bleiben files/ und cache/ vollständig ausgeschlossen. -->
 </full-backup-content>
