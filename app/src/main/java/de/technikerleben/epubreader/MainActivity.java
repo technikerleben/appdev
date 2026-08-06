@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.text.SimpleDateFormat;
@@ -113,6 +114,8 @@ public class MainActivity extends Activity {
     private OnBackInvokedCallback backCallback;
     private int restoredChapter = -1;
     private float restoredRatio = -1f;
+    private String pendingSearch;
+    private AtomicBoolean activeSearch;
 
     private static final class ReadingLocation {
         final int chapter;
@@ -686,15 +689,75 @@ public class MainActivity extends Activity {
         if (book == null) return;
         EditText input = new EditText(this);
         input.setSingleLine(true);
-        input.setHint("Wort im Kapitel");
+        input.setHint("Wort oder Ausdruck im Buch");
         input.setPadding(dp(20), dp(4), dp(20), dp(4));
         new AlertDialog.Builder(this)
-                .setTitle("Im Kapitel suchen")
+                .setTitle("Im Buch suchen")
                 .setView(input)
-                .setPositiveButton("Suchen", (dialog, which) -> webView.findAllAsync(input.getText().toString()))
+                .setPositiveButton("Suchen", (dialog, which) -> searchBook(input.getText().toString().trim()))
                 .setNeutralButton("Markierungen löschen", (dialog, which) -> webView.clearMatches())
                 .setNegativeButton("Abbrechen", null)
                 .show();
+    }
+
+    private void searchBook(String query) {
+        if (query.isEmpty() || book == null) return;
+        AtomicBoolean cancelled = new AtomicBoolean(false);
+        activeSearch = cancelled;
+        LinearLayout panel = new LinearLayout(this);
+        panel.setGravity(Gravity.CENTER_VERTICAL);
+        panel.setPadding(dp(24), dp(18), dp(24), dp(18));
+        panel.addView(new ProgressBar(this), new LinearLayout.LayoutParams(dp(44), dp(44)));
+        TextView message = new TextView(this);
+        message.setText("Alle Kapitel werden durchsucht …");
+        message.setPadding(dp(16), 0, 0, 0);
+        panel.addView(message);
+        AlertDialog waiting = new AlertDialog.Builder(this)
+                .setTitle("Suche")
+                .setView(panel)
+                .setNegativeButton("Abbrechen", (dialog, which) -> cancelled.set(true))
+                .create();
+        waiting.setOnCancelListener(dialog -> cancelled.set(true));
+        waiting.show();
+        EpubBook searchedBook = book;
+        worker.execute(() -> {
+            try {
+                List<EpubBook.SearchResult> results = searchedBook.search(query, cancelled);
+                runOnUiThreadIfAlive(() -> {
+                    waiting.dismiss();
+                    if (!cancelled.get()) showSearchResults(query, results);
+                });
+            } catch (Exception error) {
+                runOnUiThreadIfAlive(() -> {
+                    waiting.dismiss();
+                    if (!cancelled.get()) Toast.makeText(this, "Das Buch konnte nicht vollständig durchsucht werden.", Toast.LENGTH_LONG).show();
+                });
+            }
+        });
+    }
+
+    private void showSearchResults(String query, List<EpubBook.SearchResult> results) {
+        if (results.isEmpty()) {
+            new AlertDialog.Builder(this).setTitle("Keine Treffer").setMessage("„" + query + "“ wurde im Buch nicht gefunden.")
+                    .setPositiveButton("OK", null).show();
+            return;
+        }
+        List<String> rows = new ArrayList<>();
+        for (EpubBook.SearchResult result : results) rows.add(result.chapterTitle + "\n" + result.snippet);
+        ListView list = new ListView(this);
+        list.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_2, android.R.id.text1, rows));
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(results.size() + " Treffer")
+                .setView(list).setNegativeButton("Schließen", null).create();
+        list.setOnItemClickListener((parent, view, position, id) -> {
+            EpubBook.SearchResult result = results.get(position);
+            linkHistory.addLast(new ReadingLocation(chapter, scrollRatio()));
+            chapter = result.chapter;
+            restoreRatio = 0f;
+            pendingSearch = query;
+            dialog.dismiss();
+            showChapter();
+        });
+        dialog.show();
     }
 
     private void showReaderSettings() {
@@ -878,6 +941,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        if (activeSearch != null) activeSearch.set(true);
         if (android.os.Build.VERSION.SDK_INT >= 33 && backCallback != null) {
             getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(backCallback);
         }
@@ -1052,6 +1116,10 @@ public class MainActivity extends Activity {
                 if (!hasAnchor) webView.scrollTo(Math.round(range * ratio), 0);
                 // Nach dem Layout immer exakt auf die nächstgelegene Seite einrasten.
                 webView.showPage(webView.currentPage());
+                if (pendingSearch != null) {
+                    webView.findAllAsync(pendingSearch);
+                    pendingSearch = null;
+                }
                 updateNavigation();
             }, 120);
         }

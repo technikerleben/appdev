@@ -2,6 +2,7 @@ package de.technikerleben.epubreader;
 
 import android.content.Context;
 import android.net.Uri;
+import android.text.Html;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -22,6 +23,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -29,6 +32,17 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 final class EpubBook {
+    static final class SearchResult {
+        final int chapter;
+        final String chapterTitle;
+        final String snippet;
+
+        SearchResult(int chapter, String chapterTitle, String snippet) {
+            this.chapter = chapter;
+            this.chapterTitle = chapterTitle;
+            this.snippet = snippet;
+        }
+    }
     static final class Chapter {
         final String title;
         final File file;
@@ -194,6 +208,28 @@ final class EpubBook {
         int body = source.toLowerCase().indexOf("<body");
         if (body >= 0) return source.substring(0, body) + "<head>" + css + "</head>" + source.substring(body);
         return "<!doctype html><html><head>" + css + "</head><body>" + source + "</body></html>";
+    }
+
+    List<SearchResult> search(String query, AtomicBoolean cancelled) throws Exception {
+        List<SearchResult> results = new ArrayList<>();
+        String needle = query.toLowerCase(Locale.ROOT);
+        for (int i = 0; i < chapters.size() && !cancelled.get(); i++) {
+            String markup = decodeText(Files.readAllBytes(chapters.get(i).file.toPath()));
+            String text = Html.fromHtml(markup, Html.FROM_HTML_MODE_LEGACY).toString().replaceAll("\\s+", " ").trim();
+            String lower = text.toLowerCase(Locale.ROOT);
+            int from = 0;
+            while (!cancelled.get() && results.size() < 200) {
+                int match = lower.indexOf(needle, from);
+                if (match < 0) break;
+                int start = Math.max(0, match - 55);
+                int end = Math.min(text.length(), match + query.length() + 80);
+                String snippet = (start > 0 ? "…" : "") + text.substring(start, end).trim() + (end < text.length() ? "…" : "");
+                results.add(new SearchResult(i, chapters.get(i).title, snippet));
+                from = match + Math.max(1, query.length());
+            }
+            if (results.size() >= 200) break;
+        }
+        return results;
     }
 
     private static String decodeText(byte[] data) {
