@@ -15,6 +15,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewConfiguration;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -100,6 +102,7 @@ public class MainActivity extends Activity {
     private TextView loadingMessage;
     private String pendingAnchor;
     private final ArrayDeque<ReadingLocation> linkHistory = new ArrayDeque<>();
+    private OnBackInvokedCallback backCallback;
 
     private static final class ReadingLocation {
         final int chapter;
@@ -117,6 +120,11 @@ public class MainActivity extends Activity {
         store = getSharedPreferences("reader", MODE_PRIVATE);
         readerPreferences = ReaderPreferences.load(store);
         buildUi();
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            backCallback = this::handleBackNavigation;
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, backCallback);
+        }
 
         if (handleIncomingIntent(getIntent())) {
             return;
@@ -780,6 +788,9 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        if (android.os.Build.VERSION.SDK_INT >= 33 && backCallback != null) {
+            getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(backCallback);
+        }
         worker.shutdownNow();
         webView.destroy();
         super.onDestroy();
@@ -787,13 +798,17 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
+        handleBackNavigation();
+    }
+
+    private void handleBackNavigation() {
         if (!linkHistory.isEmpty()) {
             ReadingLocation previousLocation = linkHistory.removeLast();
             chapter = previousLocation.chapter;
             restoreRatio = previousLocation.ratio;
             showChapter();
         } else if (webView.canGoBack()) webView.goBack();
-        else super.onBackPressed();
+        else finishAfterTransition();
     }
 
     private int dp(int value) {
