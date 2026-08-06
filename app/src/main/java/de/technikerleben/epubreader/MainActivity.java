@@ -11,11 +11,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.Gravity;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 import android.webkit.WebResourceRequest;
@@ -102,6 +105,9 @@ public class MainActivity extends Activity {
     private Runnable pendingPositionSave;
     private View loadingOverlay;
     private TextView loadingMessage;
+    private View toolbarView;
+    private View navigationView;
+    private boolean chromeVisible = true;
     private String pendingAnchor;
     private final ArrayDeque<ReadingLocation> linkHistory = new ArrayDeque<>();
     private OnBackInvokedCallback backCallback;
@@ -180,6 +186,7 @@ public class MainActivity extends Activity {
         root.setBackgroundColor(PAPER);
 
         LinearLayout toolbar = new LinearLayout(this);
+        toolbarView = toolbar;
         toolbar.setGravity(Gravity.CENTER_VERTICAL);
         toolbar.setPadding(dp(6), dp(4), dp(6), dp(4));
         toolbar.setBackgroundColor(SLATE);
@@ -215,6 +222,7 @@ public class MainActivity extends Activity {
         root.addView(progress, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(3)));
 
         LinearLayout navigation = new LinearLayout(this);
+        navigationView = navigation;
         navigation.setGravity(Gravity.CENTER);
         navigation.setPadding(dp(6), dp(2), dp(6), dp(3));
         navigation.setBackgroundColor(Color.rgb(38, 54, 66));
@@ -717,6 +725,12 @@ public class MainActivity extends Activity {
         keepScreenOn.setMinHeight(dp(48));
         panel.addView(keepScreenOn, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
+        Switch volumeKeys = new Switch(this);
+        volumeKeys.setText("Mit Lautstärketasten blättern");
+        volumeKeys.setChecked(readerPreferences.volumeKeys);
+        volumeKeys.setMinHeight(dp(48));
+        panel.addView(volumeKeys, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
         new AlertDialog.Builder(this)
                 .setTitle("Darstellung")
                 .setView(panel)
@@ -729,6 +743,7 @@ public class MainActivity extends Activity {
                     readerPreferences.font = fonts.getSelectedItemPosition();
                     readerPreferences.theme = themes.getSelectedItemPosition();
                     readerPreferences.keepScreenOn = keepScreenOn.isChecked();
+                    readerPreferences.volumeKeys = volumeKeys.isChecked();
                     readerPreferences.save(store);
                     applyReaderWindowFlags();
                     if (book != null) showChapter();
@@ -743,6 +758,41 @@ public class MainActivity extends Activity {
         } else {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
+    }
+
+    private void toggleReaderChrome() {
+        chromeVisible = !chromeVisible;
+        toolbarView.setVisibility(chromeVisible ? View.VISIBLE : View.GONE);
+        navigationView.setVisibility(chromeVisible ? View.VISIBLE : View.GONE);
+        if (android.os.Build.VERSION.SDK_INT >= 30) {
+            WindowInsetsController controller = getWindow().getInsetsController();
+            if (controller != null) {
+                if (chromeVisible) controller.show(WindowInsets.Type.systemBars());
+                else {
+                    controller.hide(WindowInsets.Type.systemBars());
+                    controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+                }
+            }
+        } else {
+            //noinspection deprecation
+            getWindow().getDecorView().setSystemUiVisibility(chromeVisible ? View.SYSTEM_UI_FLAG_VISIBLE :
+                    View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (readerPreferences.volumeKeys && book != null) {
+            if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+                webView.turnPage(1);
+                return true;
+            }
+            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+                webView.turnPage(-1);
+                return true;
+            }
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     private TextView label(LinearLayout panel, String text) {
@@ -865,7 +915,17 @@ public class MainActivity extends Activity {
             gestures = new GestureDetector(MainActivity.this, new GestureDetector.SimpleOnGestureListener() {
                 @Override
                 public boolean onDown(MotionEvent event) {
-                    return false;
+                    return true;
+                }
+
+                @Override
+                public boolean onSingleTapUp(MotionEvent event) {
+                    if (book == null || getWidth() <= 0) return false;
+                    float third = getWidth() / 3f;
+                    if (event.getX() < third) turnPage(-1);
+                    else if (event.getX() > third * 2f) turnPage(1);
+                    else toggleReaderChrome();
+                    return true;
                 }
 
                 @Override
@@ -908,7 +968,7 @@ public class MainActivity extends Activity {
             handler.postDelayed(MainActivity.this::updateNavigation, 240);
         }
 
-        private void turnPage(int direction) {
+        void turnPage(int direction) {
             int page = currentPage();
             if (direction > 0 && page < pageCount() - 1) {
                 showPage(page + 1);
