@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewConfiguration;
+import android.view.WindowManager;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 import android.webkit.WebResourceRequest;
@@ -31,6 +32,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.view.animation.DecelerateInterpolator;
@@ -121,6 +123,7 @@ public class MainActivity extends Activity {
         super.onCreate(state);
         store = getSharedPreferences("reader", MODE_PRIVATE);
         readerPreferences = ReaderPreferences.load(store);
+        applyReaderWindowFlags();
         buildUi();
         if (android.os.Build.VERSION.SDK_INT >= 33) {
             backCallback = this::handleBackNavigation;
@@ -708,6 +711,12 @@ public class MainActivity extends Activity {
         label(panel, "Hintergrund");
         Spinner themes = spinner(panel, new String[]{"Warmweiß", "Reinweiß", "Sepia", "Dunkel", "Schwarz"}, readerPreferences.theme);
 
+        Switch keepScreenOn = new Switch(this);
+        keepScreenOn.setText("Bildschirm beim Lesen eingeschaltet lassen");
+        keepScreenOn.setChecked(readerPreferences.keepScreenOn);
+        keepScreenOn.setMinHeight(dp(48));
+        panel.addView(keepScreenOn, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
         new AlertDialog.Builder(this)
                 .setTitle("Darstellung")
                 .setView(panel)
@@ -719,11 +728,21 @@ public class MainActivity extends Activity {
                     readerPreferences.margin = margin.getProgress() + 8;
                     readerPreferences.font = fonts.getSelectedItemPosition();
                     readerPreferences.theme = themes.getSelectedItemPosition();
+                    readerPreferences.keepScreenOn = keepScreenOn.isChecked();
                     readerPreferences.save(store);
+                    applyReaderWindowFlags();
                     if (book != null) showChapter();
                 })
                 .setNegativeButton("Abbrechen", null)
                 .show();
+    }
+
+    private void applyReaderWindowFlags() {
+        if (readerPreferences.keepScreenOn) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
     }
 
     private TextView label(LinearLayout panel, String text) {
