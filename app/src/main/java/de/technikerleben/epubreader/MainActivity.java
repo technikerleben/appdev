@@ -2,7 +2,6 @@ package de.technikerleben.epubreader;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -24,6 +23,7 @@ import android.webkit.WebViewClient;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -96,6 +96,8 @@ public class MainActivity extends Activity {
     private Button next;
     private Button bookmark;
     private Runnable pendingPositionSave;
+    private View loadingOverlay;
+    private TextView loadingMessage;
     private String pendingAnchor;
     private final ArrayDeque<ReadingLocation> linkHistory = new ArrayDeque<>();
 
@@ -153,6 +155,7 @@ public class MainActivity extends Activity {
     }
 
     private void buildUi() {
+        FrameLayout container = new FrameLayout(this);
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(PAPER);
@@ -210,8 +213,43 @@ public class MainActivity extends Activity {
         next = navButton("›", "Nächstes Kapitel", v -> moveChapter(1));
         navigation.addView(next, new LinearLayout.LayoutParams(dp(54), dp(48)));
         root.addView(navigation, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(54)));
-        setContentView(root);
+        container.addView(root, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        LinearLayout overlay = new LinearLayout(this);
+        overlay.setOrientation(LinearLayout.VERTICAL);
+        overlay.setGravity(Gravity.CENTER);
+        overlay.setPadding(dp(32), dp(32), dp(32), dp(32));
+        overlay.setBackgroundColor(0xaa263642);
+        overlay.setClickable(true);
+        ProgressBar spinner = new ProgressBar(this);
+        overlay.addView(spinner, new LinearLayout.LayoutParams(dp(56), dp(56)));
+        loadingMessage = new TextView(this);
+        loadingMessage.setTextColor(Color.WHITE);
+        loadingMessage.setTextSize(17);
+        loadingMessage.setGravity(Gravity.CENTER);
+        loadingMessage.setPadding(0, dp(16), 0, 0);
+        overlay.addView(loadingMessage, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        loadingOverlay = overlay;
+        loadingOverlay.setVisibility(View.GONE);
+        container.addView(loadingOverlay, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        setContentView(container);
         updateNavigation();
+    }
+
+    private void showLoading(String message) {
+        loadingMessage.setText(message);
+        loadingOverlay.setVisibility(View.VISIBLE);
+    }
+
+    private void hideLoading() {
+        loadingOverlay.setVisibility(View.GONE);
+    }
+
+    private void runOnUiThreadIfAlive(Runnable action) {
+        runOnUiThread(() -> {
+            if (isFinishing() || isDestroyed()) return;
+            action.run();
+        });
     }
 
     private Button toolButton(String description, String text, View.OnClickListener listener) {
@@ -369,7 +407,7 @@ public class MainActivity extends Activity {
     private void refreshDigest(boolean requestedByUser) {
         File digestDir = new File(getFilesDir(), "morgenblatt");
         File digestFile = new File(digestDir, "dailydigest.epub");
-        ProgressDialog dialog = ProgressDialog.show(this, "Mein Morgenblatt", "Aktuelle Ausgabe wird geladen …", true, false);
+        showLoading("Aktuelle Morgenblatt-Ausgabe wird geladen …");
         worker.execute(() -> {
             File temporary = new File(digestDir, "dailydigest.tmp");
             try {
@@ -382,15 +420,15 @@ public class MainActivity extends Activity {
                     Files.copy(temporary.toPath(), digestFile.toPath());
                     temporary.delete();
                 }
-                runOnUiThread(() -> {
-                    dialog.dismiss();
+                runOnUiThreadIfAlive(() -> {
+                    hideLoading();
                     store.edit().putBoolean("last_is_digest", true).apply();
                     openBook(Uri.fromFile(digestFile), 0);
                 });
             } catch (Exception error) {
                 temporary.delete();
-                runOnUiThread(() -> {
-                    dialog.dismiss();
+                runOnUiThreadIfAlive(() -> {
+                    hideLoading();
                     if (digestFile.isFile()) {
                         if (requestedByUser) Toast.makeText(this, "Keine neue Ausgabe erreichbar – gespeicherte Ausgabe wird geöffnet.", Toast.LENGTH_LONG).show();
                         store.edit().putBoolean("last_is_digest", true).apply();
@@ -487,12 +525,12 @@ public class MainActivity extends Activity {
             try { getContentResolver().takePersistableUriPermission(uri, takeFlags); }
             catch (SecurityException ignored) { }
         }
-        ProgressDialog dialog = ProgressDialog.show(this, "EPUB wird geöffnet", "Inhalte werden vorbereitet …", true, false);
+        showLoading("EPUB wird geöffnet …");
         worker.execute(() -> {
             try {
                 EpubBook opened = EpubBook.open(this, uri);
-                runOnUiThread(() -> {
-                    dialog.dismiss();
+                runOnUiThreadIfAlive(() -> {
+                    hideLoading();
                     book = opened;
                     bookUri = uri;
                     store.edit().putString("last_uri", uri.toString()).apply();
@@ -504,8 +542,8 @@ public class MainActivity extends Activity {
                     showChapter();
                 });
             } catch (Exception error) {
-                runOnUiThread(() -> {
-                    dialog.dismiss();
+                runOnUiThreadIfAlive(() -> {
+                    hideLoading();
                     new AlertDialog.Builder(this)
                             .setTitle("EPUB konnte nicht geöffnet werden")
                             .setMessage(friendly(error))
