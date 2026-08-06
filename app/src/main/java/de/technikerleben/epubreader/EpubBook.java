@@ -222,11 +222,12 @@ final class EpubBook {
                 .replaceAll("(?is)<iframe\\b[^>]*>.*?</iframe>", "")
                 .replaceAll("(?i)\\son[a-z]+\\s*=\\s*(['\"]).*?\\1", "");
         int pageGap = preferences.margin * 2;
-        String css = "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no\" />" +
+        int effectiveFontSize = Math.round(preferences.fontSize * preferences.systemFontScale);
+        String css = "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\" />" +
                 "<style>html{width:100%;height:100%;padding:0;margin:0;overflow-x:auto!important;overflow-y:hidden!important;" +
                 "background:" + preferences.background + "!important;color:" + preferences.foreground + "!important}" +
                 "body{box-sizing:border-box;width:auto!important;max-width:none!important;height:calc(100vh - " + pageGap +
-                "px)!important;font-family:" + preferences.fontFamily + "!important;font-size:" + preferences.fontSize +
+                "px)!important;font-family:" + preferences.fontFamily + "!important;font-size:" + effectiveFontSize +
                 "px!important;line-height:" + preferences.lineHeight + "!important;margin:" + preferences.margin +
                 "px!important;padding:0!important;-webkit-column-width:calc(100vw - " + pageGap +
                 "px);column-width:calc(100vw - " + pageGap + "px);-webkit-column-gap:" + pageGap +

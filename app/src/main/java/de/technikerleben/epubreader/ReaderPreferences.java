@@ -14,6 +14,7 @@ final class ReaderPreferences {
     String foreground;
     String link;
     String fontFamily;
+    float systemFontScale = 1f;
 
     static ReaderPreferences load(SharedPreferences preferences) {
         ReaderPreferences result = new ReaderPreferences();

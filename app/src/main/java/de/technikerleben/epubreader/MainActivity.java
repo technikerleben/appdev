@@ -15,6 +15,7 @@ import android.view.Gravity;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewConfiguration;
@@ -142,6 +143,7 @@ public class MainActivity extends Activity {
         super.onCreate(state);
         store = getSharedPreferences("reader", MODE_PRIVATE);
         readerPreferences = ReaderPreferences.load(store);
+        readerPreferences.systemFontScale = getResources().getConfiguration().fontScale;
         applyReaderWindowFlags();
         buildUi();
         if (android.os.Build.VERSION.SDK_INT >= 33) {
@@ -297,7 +299,7 @@ public class MainActivity extends Activity {
         button.setTextSize("Aa".equals(text) ? 15 : 22);
         button.setMinWidth(0);
         button.setMinimumWidth(0);
-        button.setLayoutParams(new LinearLayout.LayoutParams(dp(46), dp(48)));
+        button.setLayoutParams(new LinearLayout.LayoutParams(dp(48), dp(48)));
         return button;
     }
 
@@ -955,6 +957,7 @@ public class MainActivity extends Activity {
         SeekBar seek = new SeekBar(this);
         seek.setMax(max);
         seek.setProgress(progress);
+        seek.setContentDescription("Einstellwert");
         panel.addView(seek, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(42)));
         return seek;
     }
@@ -1054,7 +1057,9 @@ public class MainActivity extends Activity {
 
     private final class ReaderWebView extends WebView {
         private final GestureDetector gestures;
+        private final ScaleGestureDetector scaling;
         private final int touchSlop;
+        private float scaledFontSize;
 
         ReaderWebView() {
             super(MainActivity.this);
@@ -1086,6 +1091,30 @@ public class MainActivity extends Activity {
                 }
             });
             gestures.setIsLongpressEnabled(true);
+            scaling = new ScaleGestureDetector(MainActivity.this, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                @Override
+                public boolean onScaleBegin(ScaleGestureDetector detector) {
+                    scaledFontSize = readerPreferences.fontSize;
+                    return true;
+                }
+
+                @Override
+                public boolean onScale(ScaleGestureDetector detector) {
+                    scaledFontSize = Math.max(14f, Math.min(34f, scaledFontSize * detector.getScaleFactor()));
+                    return true;
+                }
+
+                @Override
+                public void onScaleEnd(ScaleGestureDetector detector) {
+                    int target = Math.round(scaledFontSize);
+                    if (target != readerPreferences.fontSize) {
+                        restoreRatio = scrollRatio();
+                        readerPreferences.fontSize = target;
+                        readerPreferences.save(store);
+                        post(MainActivity.this::showChapter);
+                    }
+                }
+            });
             setBackgroundColor(PAPER);
             setVerticalScrollBarEnabled(false);
             setHorizontalScrollBarEnabled(false);
@@ -1136,9 +1165,10 @@ public class MainActivity extends Activity {
 
         @Override
         public boolean onTouchEvent(MotionEvent event) {
+            boolean scaleHandled = scaling.onTouchEvent(event);
             boolean webHandled = super.onTouchEvent(event);
-            boolean gestureHandled = gestures.onTouchEvent(event);
-            return gestureHandled || webHandled;
+            boolean gestureHandled = !scaling.isInProgress() && gestures.onTouchEvent(event);
+            return scaleHandled || gestureHandled || webHandled;
         }
 
         @Override
