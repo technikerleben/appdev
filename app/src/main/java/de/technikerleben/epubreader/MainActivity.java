@@ -11,9 +11,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Gravity;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewConfiguration;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -737,11 +739,29 @@ public class MainActivity extends Activity {
     }
 
     private final class ReaderWebView extends WebView {
-        private float downX;
-        private float downY;
+        private final GestureDetector gestures;
+        private final int touchSlop;
 
         ReaderWebView() {
             super(MainActivity.this);
+            touchSlop = ViewConfiguration.get(MainActivity.this).getScaledTouchSlop();
+            gestures = new GestureDetector(MainActivity.this, new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onDown(MotionEvent event) {
+                    return false;
+                }
+
+                @Override
+                public boolean onFling(MotionEvent start, MotionEvent end, float velocityX, float velocityY) {
+                    if (start == null || end == null) return false;
+                    float dx = end.getX() - start.getX();
+                    float dy = end.getY() - start.getY();
+                    if (Math.abs(dx) <= touchSlop || Math.abs(dx) <= Math.abs(dy)) return false;
+                    turnPage(dx < 0 ? 1 : -1);
+                    return true;
+                }
+            });
+            gestures.setIsLongpressEnabled(true);
             setBackgroundColor(PAPER);
             setVerticalScrollBarEnabled(false);
             setHorizontalScrollBarEnabled(false);
@@ -792,20 +812,9 @@ public class MainActivity extends Activity {
 
         @Override
         public boolean onTouchEvent(MotionEvent event) {
-            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                downX = event.getX();
-                downY = event.getY();
-                return true;
-            }
-            if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-                float dx = event.getX() - downX;
-                float dy = event.getY() - downY;
-                if (Math.abs(dx) > dp(45) && Math.abs(dx) > Math.abs(dy)) {
-                    turnPage(dx < 0 ? 1 : -1);
-                }
-                return true;
-            }
-            return true;
+            boolean webHandled = super.onTouchEvent(event);
+            boolean gestureHandled = gestures.onTouchEvent(event);
+            return gestureHandled || webHandled;
         }
 
         @Override
