@@ -10,6 +10,7 @@ final class ReaderPreferences {
     int font;
     boolean keepScreenOn;
     boolean volumeKeys;
+    boolean publisherLayout;
     String background;
     String foreground;
     String link;
@@ -25,6 +26,7 @@ final class ReaderPreferences {
         result.font = preferences.getInt("font", 0);
         result.keepScreenOn = preferences.getBoolean("keep_screen_on", false);
         result.volumeKeys = preferences.getBoolean("volume_keys", false);
+        result.publisherLayout = preferences.getBoolean("publisher_layout", false);
         result.resolve();
         return result;
     }
@@ -38,6 +40,7 @@ final class ReaderPreferences {
                 .putInt("font", font)
                 .putBoolean("keep_screen_on", keepScreenOn)
                 .putBoolean("volume_keys", volumeKeys)
+                .putBoolean("publisher_layout", publisherLayout)
                 .apply();
         resolve();
     }

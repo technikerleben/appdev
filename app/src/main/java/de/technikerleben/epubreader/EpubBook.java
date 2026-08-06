@@ -223,19 +223,24 @@ final class EpubBook {
                 .replaceAll("(?i)\\son[a-z]+\\s*=\\s*(['\"]).*?\\1", "");
         int pageGap = preferences.margin * 2;
         int effectiveFontSize = Math.round(preferences.fontSize * preferences.systemFontScale);
+        String bodyTypography = preferences.publisherLayout ? "" :
+                "font-family:" + preferences.fontFamily + "!important;font-size:" + effectiveFontSize +
+                "px!important;line-height:" + preferences.lineHeight + "!important;";
+        String bodyExtra = preferences.publisherLayout ? "" : "overflow-wrap:anywhere;";
+        String readerLayout = preferences.publisherLayout ? "" :
+                "p{margin:.65em 0}h1,h2,h3,h4,figure,img,svg,video{break-inside:avoid}" +
+                "img,svg,video{max-width:100%!important;max-height:calc(100vh - " + pageGap +
+                "px)!important;height:auto!important}table{max-width:100%!important;font-size:.9em}a{color:" + preferences.link +
+                "!important}pre{white-space:pre-wrap}body>*:first-child{margin-top:0}";
         String css = "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\" />" +
                 "<style>html{width:100%;height:100%;padding:0;margin:0;overflow-x:auto!important;overflow-y:hidden!important;" +
                 "background:" + preferences.background + "!important;color:" + preferences.foreground + "!important}" +
                 "body{box-sizing:border-box;width:auto!important;max-width:none!important;height:calc(100vh - " + pageGap +
-                "px)!important;font-family:" + preferences.fontFamily + "!important;font-size:" + effectiveFontSize +
-                "px!important;line-height:" + preferences.lineHeight + "!important;margin:" + preferences.margin +
+                "px)!important;" + bodyTypography + "margin:" + preferences.margin +
                 "px!important;padding:0!important;-webkit-column-width:calc(100vw - " + pageGap +
                 "px);column-width:calc(100vw - " + pageGap + "px);-webkit-column-gap:" + pageGap +
-                "px;column-gap:" + pageGap + "px;-webkit-column-fill:auto;column-fill:auto;overflow:visible!important;" +
-                "overflow-wrap:anywhere}p{margin:.65em 0}h1,h2,h3,h4,figure,img,svg,video{break-inside:avoid}" +
-                "img,svg,video{max-width:100%!important;max-height:calc(100vh - " + pageGap +
-                "px)!important;height:auto!important}table{max-width:100%!important;font-size:.9em}a{color:" + preferences.link +
-                "!important}pre{white-space:pre-wrap}body>*:first-child{margin-top:0}" +
+                "px;column-gap:" + pageGap + "px;-webkit-column-fill:auto;column-fill:auto;overflow:visible!important;" + bodyExtra + "}" +
+                readerLayout +
                 "@media (min-width:600px){body{-webkit-column-width:calc((100vw - " + (pageGap * 2) +
                 "px)/2);column-width:calc((100vw - " + (pageGap * 2) + "px)/2)}}</style>";
         int head = source.toLowerCase().indexOf("</head>");

@@ -49,6 +49,7 @@
     <string-array name="theme_choices"><item>Warmweiß</item><item>Reinweiß</item><item>Sepia</item><item>Dunkel</item><item>Schwarz</item></string-array>
     <string name="keep_screen_on">Bildschirm beim Lesen eingeschaltet lassen</string>
     <string name="volume_keys">Mit Lautstärketasten blättern</string>
+    <string name="publisher_layout">Layout des Buchs beibehalten</string>
     <string name="apply">Übernehmen</string>
     <string name="setting_value">Einstellwert</string>
     <string name="external_link_title">Externen Link öffnen?</string>

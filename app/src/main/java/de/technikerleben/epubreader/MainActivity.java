@@ -878,6 +878,12 @@ public class MainActivity extends Activity {
         volumeKeys.setMinHeight(dp(48));
         panel.addView(volumeKeys, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
+        Switch publisherLayout = new Switch(this);
+        publisherLayout.setText(R.string.publisher_layout);
+        publisherLayout.setChecked(readerPreferences.publisherLayout);
+        publisherLayout.setMinHeight(dp(48));
+        panel.addView(publisherLayout, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
         new AlertDialog.Builder(this)
                 .setTitle(R.string.appearance)
                 .setView(panel)
@@ -891,6 +897,7 @@ public class MainActivity extends Activity {
                     readerPreferences.theme = themes.getSelectedItemPosition();
                     readerPreferences.keepScreenOn = keepScreenOn.isChecked();
                     readerPreferences.volumeKeys = volumeKeys.isChecked();
+                    readerPreferences.publisherLayout = publisherLayout.isChecked();
                     readerPreferences.save(store);
                     applyReaderWindowFlags();
                     if (book != null) showChapter();
