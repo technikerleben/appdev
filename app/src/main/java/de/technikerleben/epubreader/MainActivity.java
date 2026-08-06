@@ -6,6 +6,8 @@ import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,9 +29,11 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -79,12 +83,18 @@ public class MainActivity extends Activity {
         final String title;
         final long lastRead;
         final boolean digest;
+        final String author;
+        final String coverPath;
+        final int progress;
 
-        RecentBook(String uri, String title, long lastRead, boolean digest) {
+        RecentBook(String uri, String title, long lastRead, boolean digest, String author, String coverPath, int progress) {
             this.uri = uri;
             this.title = title;
             this.lastRead = lastRead;
             this.digest = digest;
+            this.author = author;
+            this.coverPath = coverPath;
+            this.progress = progress;
         }
     }
 
@@ -339,14 +349,8 @@ public class MainActivity extends Activity {
         panel.addView(hint);
 
         ListView list = new ListView(this);
-        List<String> rows = new ArrayList<>();
-        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy, HH:mm", Locale.GERMANY);
         String current = bookUri == null ? null : bookUri.toString();
-        for (RecentBook item : books) {
-            String marker = item.uri.equals(current) ? "▶  " : (item.digest ? "☀  " : "▤  ");
-            rows.add(marker + item.title + "\nZuletzt gelesen: " + format.format(new Date(item.lastRead)));
-        }
-        list.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, rows));
+        list.setAdapter(new RecentBooksAdapter(books, current));
         panel.addView(list, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 books.isEmpty() ? dp(40) : Math.min(dp(420), dp(72) * books.size())));
 
@@ -393,7 +397,8 @@ public class MainActivity extends Activity {
             for (int i = 0; i < array.length(); i++) {
                 JSONObject item = array.getJSONObject(i);
                 result.add(new RecentBook(item.getString("uri"), item.optString("title", "Unbenanntes Buch"),
-                        item.optLong("lastRead", 0), item.optBoolean("digest", false)));
+                        item.optLong("lastRead", 0), item.optBoolean("digest", false), item.optString("author", ""),
+                        item.optString("coverPath", ""), item.optInt("progress", 0)));
             }
         } catch (Exception ignored) { }
         return result;
@@ -409,6 +414,9 @@ public class MainActivity extends Activity {
                 json.put("title", item.title);
                 json.put("lastRead", item.lastRead);
                 json.put("digest", item.digest);
+                json.put("author", item.author);
+                json.put("coverPath", item.coverPath);
+                json.put("progress", item.progress);
                 array.put(json);
             }
         } catch (Exception ignored) { }
@@ -418,11 +426,83 @@ public class MainActivity extends Activity {
     private void rememberBook(String title, Uri uri, boolean digest) {
         List<RecentBook> books = loadRecentBooks();
         String key = uri.toString();
+        RecentBook previousEntry = null;
         for (int i = books.size() - 1; i >= 0; i--) {
-            if (books.get(i).uri.equals(key) || (digest && books.get(i).digest)) books.remove(i);
+            if (books.get(i).uri.equals(key) || (digest && books.get(i).digest)) previousEntry = books.remove(i);
         }
-        books.add(0, new RecentBook(key, title, System.currentTimeMillis(), digest));
+        int readingProgress = book == null ? 0 : Math.round(100f * (chapter + scrollRatio()) / Math.max(1, book.chapters.size()));
+        String author = book == null ? "" : book.author;
+        String coverPath = persistCover(key);
+        if (author.isEmpty() && previousEntry != null) author = previousEntry.author;
+        if (coverPath.isEmpty() && previousEntry != null) coverPath = previousEntry.coverPath;
+        books.add(0, new RecentBook(key, title, System.currentTimeMillis(), digest, author, coverPath, readingProgress));
         saveRecentBooks(books);
+    }
+
+    private String persistCover(String key) {
+        if (book == null || book.cover == null) return "";
+        File directory = new File(getFilesDir(), "covers");
+        File target = new File(directory, Integer.toHexString(key.hashCode()) + ".png");
+        if (target.isFile()) return target.getAbsolutePath();
+        try {
+            if (!directory.exists() && !directory.mkdirs()) return "";
+            Bitmap source = BitmapFactory.decodeFile(book.cover.getAbsolutePath());
+            if (source == null) return "";
+            int width = Math.max(1, dp(72));
+            int height = Math.max(1, Math.round(source.getHeight() * width / (float) source.getWidth()));
+            Bitmap thumbnail = Bitmap.createScaledBitmap(source, width, height, true);
+            try (FileOutputStream output = new FileOutputStream(target)) {
+                thumbnail.compress(Bitmap.CompressFormat.PNG, 90, output);
+            }
+            if (thumbnail != source) thumbnail.recycle();
+            source.recycle();
+            return target.getAbsolutePath();
+        } catch (Exception ignored) {
+            return "";
+        }
+    }
+
+    private final class RecentBooksAdapter extends BaseAdapter {
+        private final List<RecentBook> books;
+        private final String current;
+        private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy, HH:mm", Locale.GERMANY);
+
+        RecentBooksAdapter(List<RecentBook> books, String current) {
+            this.books = books;
+            this.current = current;
+        }
+
+        public int getCount() { return books.size(); }
+        public RecentBook getItem(int position) { return books.get(position); }
+        public long getItemId(int position) { return position; }
+
+        public View getView(int position, View reusable, ViewGroup parent) {
+            RecentBook item = getItem(position);
+            LinearLayout row = new LinearLayout(MainActivity.this);
+            row.setGravity(Gravity.CENTER_VERTICAL);
+            row.setPadding(dp(10), dp(6), dp(12), dp(6));
+            ImageView cover = new ImageView(MainActivity.this);
+            cover.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            cover.setBackgroundColor(Color.LTGRAY);
+            if (!item.coverPath.isEmpty()) cover.setImageBitmap(BitmapFactory.decodeFile(item.coverPath));
+            row.addView(cover, new LinearLayout.LayoutParams(dp(46), dp(64)));
+            LinearLayout text = new LinearLayout(MainActivity.this);
+            text.setOrientation(LinearLayout.VERTICAL);
+            text.setPadding(dp(12), 0, 0, 0);
+            TextView title = new TextView(MainActivity.this);
+            title.setText((item.uri.equals(current) ? "▶  " : (item.digest ? "☀  " : "")) + item.title);
+            title.setTextSize(16);
+            title.setTextColor(Color.rgb(38, 54, 66));
+            title.setMaxLines(1);
+            text.addView(title);
+            TextView details = new TextView(MainActivity.this);
+            String authorLine = item.author.isEmpty() ? "" : item.author + " · ";
+            details.setText(authorLine + item.progress + " %\nZuletzt: " + dateFormat.format(new Date(item.lastRead)));
+            details.setTextSize(12);
+            text.addView(details);
+            row.addView(text, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+            return row;
+        }
     }
 
     @Override

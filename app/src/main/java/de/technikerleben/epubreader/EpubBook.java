@@ -54,10 +54,14 @@ final class EpubBook {
     }
 
     final String title;
+    final String author;
+    final File cover;
     final List<Chapter> chapters;
 
-    private EpubBook(String title, List<Chapter> chapters) {
+    private EpubBook(String title, String author, File cover, List<Chapter> chapters) {
         this.title = title;
+        this.author = author;
+        this.cover = cover;
         this.chapters = chapters;
     }
 
@@ -114,11 +118,21 @@ final class EpubBook {
 
         String bookTitle = textOfFirst(packageDoc, "title");
         if (bookTitle == null || bookTitle.trim().isEmpty()) bookTitle = "Unbenanntes Buch";
+        String bookAuthor = textOfFirst(packageDoc, "creator");
+        if (bookAuthor == null) bookAuthor = "";
+
+        String coverId = null;
+        NodeList metas = packageDoc.getElementsByTagNameNS("*", "meta");
+        for (int i = 0; i < metas.getLength(); i++) {
+            Element meta = (Element) metas.item(i);
+            if ("cover".equalsIgnoreCase(meta.getAttribute("name"))) coverId = meta.getAttribute("content");
+        }
 
         Map<String, String> hrefById = new LinkedHashMap<>();
         Map<String, String> mediaById = new HashMap<>();
         String navHref = null;
         String ncxHref = null;
+        String coverHref = null;
         NodeList items = packageDoc.getElementsByTagNameNS("*", "item");
         for (int i = 0; i < items.getLength(); i++) {
             Element item = (Element) items.item(i);
@@ -128,6 +142,7 @@ final class EpubBook {
             hrefById.put(id, href);
             mediaById.put(id, media);
             if (item.getAttribute("properties").contains("nav")) navHref = href;
+            if (item.getAttribute("properties").contains("cover-image") || id.equals(coverId)) coverHref = href;
             if ("application/x-dtbncx+xml".equals(media)) ncxHref = href;
         }
 
@@ -150,7 +165,9 @@ final class EpubBook {
             chapters.add(new Chapter(chapterTitle, chapterFile));
         }
         if (chapters.isEmpty()) throw new IllegalArgumentException("Das EPUB enthält keine lesbaren Kapitel.");
-        return new EpubBook(bookTitle.trim(), chapters);
+        File coverFile = coverHref == null ? null : new File(contentDir, hrefPath(coverHref));
+        if (coverFile != null && !coverFile.isFile()) coverFile = null;
+        return new EpubBook(bookTitle.trim(), bookAuthor.trim(), coverFile, chapters);
     }
 
     private static void readNavTitles(File nav, File contentDir, Map<String, String> titles) {
