@@ -103,6 +103,8 @@ public class MainActivity extends Activity {
     private String pendingAnchor;
     private final ArrayDeque<ReadingLocation> linkHistory = new ArrayDeque<>();
     private OnBackInvokedCallback backCallback;
+    private int restoredChapter = -1;
+    private float restoredRatio = -1f;
 
     private static final class ReadingLocation {
         final int chapter;
@@ -127,6 +129,12 @@ public class MainActivity extends Activity {
         }
 
         if (handleIncomingIntent(getIntent())) {
+            return;
+        }
+        if (state != null && state.getString("book_uri") != null) {
+            restoredChapter = state.getInt("chapter", -1);
+            restoredRatio = state.getFloat("ratio", -1f);
+            openBook(Uri.parse(state.getString("book_uri")), 0);
             return;
         }
         if (store.getBoolean("last_is_digest", false)) {
@@ -543,8 +551,11 @@ public class MainActivity extends Activity {
                     bookUri = uri;
                     store.edit().putString("last_uri", uri.toString()).apply();
                     String prefix = bookKey();
-                    chapter = Math.max(0, Math.min(store.getInt(prefix + "chapter", 0), book.chapters.size() - 1));
-                    restoreRatio = store.getFloat(prefix + "ratio", 0f);
+                    int savedChapter = restoredChapter >= 0 ? restoredChapter : store.getInt(prefix + "chapter", 0);
+                    chapter = Math.max(0, Math.min(savedChapter, book.chapters.size() - 1));
+                    restoreRatio = restoredRatio >= 0f ? restoredRatio : store.getFloat(prefix + "ratio", 0f);
+                    restoredChapter = -1;
+                    restoredRatio = -1f;
                     titleView.setText(book.title);
                     rememberBook(book.title, bookUri, store.getBoolean("last_is_digest", false));
                     showChapter();
@@ -784,6 +795,16 @@ public class MainActivity extends Activity {
             rememberBook(book.title, bookUri, store.getBoolean("last_is_digest", false));
         }
         super.onPause();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+        if (bookUri != null) {
+            state.putString("book_uri", bookUri.toString());
+            state.putInt("chapter", chapter);
+            state.putFloat("ratio", scrollRatio());
+        }
     }
 
     @Override

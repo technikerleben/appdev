@@ -186,7 +186,9 @@ final class EpubBook {
                 "overflow-wrap:anywhere}p{margin:.65em 0}h1,h2,h3,h4,figure,img,svg,video{break-inside:avoid}" +
                 "img,svg,video{max-width:100%!important;max-height:calc(100vh - " + pageGap +
                 "px)!important;height:auto!important}table{max-width:100%!important;font-size:.9em}a{color:" + preferences.link +
-                "!important}pre{white-space:pre-wrap}body>*:first-child{margin-top:0}</style>";
+                "!important}pre{white-space:pre-wrap}body>*:first-child{margin-top:0}" +
+                "@media (min-width:600px){body{-webkit-column-width:calc((100vw - " + (pageGap * 2) +
+                "px)/2);column-width:calc((100vw - " + (pageGap * 2) + "px)/2)}}</style>";
         int head = source.toLowerCase().indexOf("</head>");
         if (head >= 0) return source.substring(0, head) + css + source.substring(head);
         int body = source.toLowerCase().indexOf("<body");
