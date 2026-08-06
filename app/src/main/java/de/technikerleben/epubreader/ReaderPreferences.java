@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 final class ReaderPreferences {
     int fontSize;
     int margin;
-    int brightness;
     float lineHeight;
     int theme;
     int font;
@@ -18,7 +17,6 @@ final class ReaderPreferences {
         ReaderPreferences result = new ReaderPreferences();
         result.fontSize = preferences.getInt("font_size", 20);
         result.margin = preferences.getInt("margin", 18);
-        result.brightness = preferences.getInt("brightness", 70);
         result.lineHeight = preferences.getFloat("line_height", 1.6f);
         result.theme = preferences.getInt("theme", 0);
         result.font = preferences.getInt("font", 0);
@@ -30,7 +28,6 @@ final class ReaderPreferences {
         preferences.edit()
                 .putInt("font_size", fontSize)
                 .putInt("margin", margin)
-                .putInt("brightness", brightness)
                 .putFloat("line_height", lineHeight)
                 .putInt("theme", theme)
                 .putInt("font", font)
