@@ -46,10 +46,12 @@ final class EpubBook {
     static final class Chapter {
         final String title;
         final File file;
+        final int depth;
 
-        Chapter(String title, File file) {
+        Chapter(String title, File file, int depth) {
             this.title = title;
             this.file = file;
+            this.depth = depth;
         }
     }
 
@@ -147,8 +149,9 @@ final class EpubBook {
         }
 
         Map<String, String> titles = new HashMap<>();
-        if (navHref != null) readNavTitles(new File(contentDir, hrefPath(navHref)), contentDir, titles);
-        if (titles.isEmpty() && ncxHref != null) readNcxTitles(new File(contentDir, hrefPath(ncxHref)), contentDir, titles);
+        Map<String, Integer> depths = new HashMap<>();
+        if (navHref != null) readNavTitles(new File(contentDir, hrefPath(navHref)), contentDir, titles, depths);
+        if (titles.isEmpty() && ncxHref != null) readNcxTitles(new File(contentDir, hrefPath(ncxHref)), contentDir, titles, depths);
 
         List<Chapter> chapters = new ArrayList<>();
         NodeList refs = packageDoc.getElementsByTagNameNS("*", "itemref");
@@ -162,7 +165,7 @@ final class EpubBook {
             String key = canonicalRelative(contentDir, chapterFile);
             String chapterTitle = titles.get(key);
             if (chapterTitle == null || chapterTitle.isEmpty()) chapterTitle = "Abschnitt " + (chapters.size() + 1);
-            chapters.add(new Chapter(chapterTitle, chapterFile));
+            chapters.add(new Chapter(chapterTitle, chapterFile, depths.getOrDefault(key, 0)));
         }
         if (chapters.isEmpty()) throw new IllegalArgumentException("Das EPUB enthält keine lesbaren Kapitel.");
         File coverFile = coverHref == null ? null : new File(contentDir, hrefPath(coverHref));
@@ -170,7 +173,7 @@ final class EpubBook {
         return new EpubBook(bookTitle.trim(), bookAuthor.trim(), coverFile, chapters);
     }
 
-    private static void readNavTitles(File nav, File contentDir, Map<String, String> titles) {
+    private static void readNavTitles(File nav, File contentDir, Map<String, String> titles, Map<String, Integer> depths) {
         try {
             Document doc = parseXml(nav);
             NodeList anchors = doc.getElementsByTagNameNS("*", "a");
@@ -179,12 +182,14 @@ final class EpubBook {
                 String href = a.getAttribute("href");
                 if (href.isEmpty()) continue;
                 File file = new File(nav.getParentFile(), hrefPath(href));
-                titles.put(canonicalRelative(contentDir, file), a.getTextContent().trim());
+                String key = canonicalRelative(contentDir, file);
+                titles.put(key, a.getTextContent().trim());
+                depths.put(key, ancestorDepth(a, "li", 1));
             }
         } catch (Exception ignored) { }
     }
 
-    private static void readNcxTitles(File ncx, File contentDir, Map<String, String> titles) {
+    private static void readNcxTitles(File ncx, File contentDir, Map<String, String> titles, Map<String, Integer> depths) {
         try {
             Document doc = parseXml(ncx);
             NodeList points = doc.getElementsByTagNameNS("*", "navPoint");
@@ -194,9 +199,21 @@ final class EpubBook {
                 Element label = child(point, "navLabel");
                 if (content == null || label == null) continue;
                 File file = new File(ncx.getParentFile(), hrefPath(content.getAttribute("src")));
-                titles.put(canonicalRelative(contentDir, file), label.getTextContent().trim());
+                String key = canonicalRelative(contentDir, file);
+                titles.put(key, label.getTextContent().trim());
+                depths.put(key, ancestorDepth(point, "navPoint", 0));
             }
         } catch (Exception ignored) { }
+    }
+
+    private static int ancestorDepth(Node node, String localName, int baseline) {
+        int count = 0;
+        Node parent = node.getParentNode();
+        while (parent != null) {
+            if (parent instanceof Element && localName.equals(((Element) parent).getLocalName())) count++;
+            parent = parent.getParentNode();
+        }
+        return Math.max(0, count - baseline);
     }
 
     String html(int index, ReaderPreferences preferences) throws Exception {

@@ -730,7 +730,10 @@ public class MainActivity extends Activity {
         List<String> rows = new ArrayList<>();
         Set<Integer> marks = bookmarks();
         for (int i = 0; i < book.chapters.size(); i++) {
-            rows.add((marks.contains(i) ? "★  " : "") + (i + 1) + ".  " + book.chapters.get(i).title);
+            EpubBook.Chapter item = book.chapters.get(i);
+            StringBuilder indentation = new StringBuilder();
+            for (int level = 0; level < item.depth; level++) indentation.append("    ");
+            rows.add(indentation + (marks.contains(i) ? "★  " : "") + (i + 1) + ".  " + item.title);
         }
         ListView list = new ListView(this);
         list.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, rows));
