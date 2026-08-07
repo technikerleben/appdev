@@ -13,12 +13,12 @@
 
   <div class="stretch">
     <div class="title title--small text--uppercase">{{ section }}</div>
-    <div class="grid {% if section contains 'Zubereitung' %}grid--cols-1{% else %}grid--cols-2{% endif %} gap--small" style="margin-top: 12px">
-      {% for line in lines %}
+    <div class="grid {% if kind == 'steps' %}grid--cols-1{% else %}grid--cols-2{% endif %} gap--small" style="margin-top: 12px">
+      {% for entry in entries %}
         <div class="item">
           <div class="content">
-            <span class="label label--small">{% if section contains 'Zubereitung' %}{{ start | plus: forloop.index0 }}.{% else %}•{% endif %}</span>
-            <span class="description">{{ line }}</span>
+            <span class="label label--small">{{ entry.marker }}</span>
+            <span class="description">{{ entry.text }}</span>
           </div>
         </div>
       {% endfor %}

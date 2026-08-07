@@ -14,9 +14,8 @@ test("rejects arbitrary webhook targets", () => {
 });
 
 test("compacts page input", () => {
-  const page = compactPage({ title: "A".repeat(120), lines: ["Zutat"], page: 2, pages: 4, start: 5 });
+  const page = compactPage({ title: "A".repeat(120), entries: [{ marker: "•", text: "Zutat" }], page: 2, pages: 4 });
   assert.equal(page.title.length, 90);
-  assert.deepEqual(page.lines, ["Zutat"]);
+  assert.deepEqual(page.entries, [{ marker: "•", text: "Zutat" }]);
   assert.equal(page.page, 2);
-  assert.equal(page.start, 5);
 });

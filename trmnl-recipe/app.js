@@ -23,12 +23,6 @@ function lines(value) {
   return String(value || "").split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
 }
 
-function chunks(items, size) {
-  const result = [];
-  for (let index = 0; index < items.length; index += size) result.push(items.slice(index, index + size));
-  return result;
-}
-
 function hostname(url) {
   try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return ""; }
 }
@@ -38,14 +32,7 @@ function metaFor(recipe) {
 }
 
 function buildPages(recipe) {
-  const drafts = [];
-  chunks(recipe.ingredients || [], 10).forEach((part, index, all) => drafts.push({
-    section: all.length > 1 ? `Zutaten ${index + 1}/${all.length}` : "Zutaten", kind: "ingredients", start: index * 10 + 1, lines: part
-  }));
-  chunks(recipe.instructions || [], 4).forEach((part, index, all) => drafts.push({
-    section: all.length > 1 ? `Zubereitung ${index + 1}/${all.length}` : "Zubereitung", kind: "steps", start: index * 4 + 1, lines: part
-  }));
-  if (!drafts.length) drafts.push({ section: "Rezept", kind: "steps", start: 1, lines: [recipe.description || "Noch keine Zutaten oder Schritte eingetragen."] });
+  const drafts = window.RecipePagination.paginateRecipeContent(recipe);
   return drafts.map((draft, index) => ({
     ...draft, title: recipe.title, meta: metaFor(recipe), page: index + 1, pages: drafts.length,
     source: recipe.sourceName || hostname(recipe.sourceUrl)
@@ -86,9 +73,9 @@ function renderScreen() {
   elements.display.append(top, textElement("div", "screen-meta", page.meta), textElement("div", "screen-section", page.section));
   const list = document.createElement("ol");
   list.className = `screen-list ${page.kind === "steps" ? "steps" : ""}`;
-  page.lines.forEach((line, index) => {
+  page.entries.forEach((entry) => {
     const item = document.createElement("li");
-    item.append(textElement("b", "", page.kind === "steps" ? `${page.start + index}.` : "•"), textElement("span", "", line));
+    item.append(textElement("b", "", entry.marker), textElement("span", "", entry.text));
     list.append(item);
   });
   elements.display.append(list);

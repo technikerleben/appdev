@@ -72,6 +72,7 @@ textarea { resize: vertical; line-height: 1.45; }
 .screen-list.steps { grid-template-columns: 1fr; font-size: clamp(10px, 1.95vw, 16px); line-height: 1.22; }
 .screen-list li { display: grid; grid-template-columns: auto 1fr; gap: 7px; min-width: 0; }
 .screen-list b { font-family: ui-monospace, monospace; }
+.screen-list li span { min-width: 0; overflow-wrap: anywhere; hyphens: auto; }
 .screen-source { position: absolute; bottom: 2.5%; right: 3%; font: 500 clamp(7px, 1.3vw, 10px)/1 ui-sans-serif; color: #444; }
 .device-screen { position: relative; }
 .device-name { display: block; margin-top: 8px; letter-spacing: .16em; font-size: 9px; color: #777; }

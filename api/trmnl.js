@@ -21,15 +21,18 @@ function cleanString(value, max) {
 }
 
 function compactPage(page) {
-  const lines = Array.isArray(page.lines) ? page.lines.slice(0, 12).map((line) => cleanString(line, 180)) : [];
+  const entries = Array.isArray(page.entries) ? page.entries.slice(0, 12).map((entry) => ({
+    marker: cleanString(entry?.marker, 5),
+    text: cleanString(entry?.text, 240)
+  })) : [];
   return {
     title: cleanString(page.title, 90),
     meta: cleanString(page.meta, 100),
     section: cleanString(page.section, 36),
     page: Number(page.page) || 1,
     pages: Number(page.pages) || 1,
-    start: Math.max(1, Number(page.start) || 1),
-    lines,
+    kind: page.kind === "steps" ? "steps" : "ingredients",
+    entries,
     source: cleanString(page.source, 55),
     revision: Date.now()
   };
