@@ -27,3 +27,10 @@ test("extracts a recipe from JSON-LD graph", () => {
 test("reports pages without recipe data", () => {
   assert.throws(() => parseRecipeHtml("<html><p>Kein Rezept</p></html>", "https://example.org"), /keine maschinenlesbaren Rezeptdaten/);
 });
+
+test("prefers the descriptive yield when sites provide duplicate values", () => {
+  const html = `<script type="application/ld+json">{
+    "@type":"Recipe","name":"Testrezept","recipeYield":["4","4 Portionen"]
+  }</script>`;
+  assert.equal(parseRecipeHtml(html, "https://example.org").yield, "4 Portionen");
+});
