@@ -1,0 +1,32 @@
+<div class="layout layout--col gap--space-between">
+  <div>
+    <div class="flex flex--row flex--space-between flex--top">
+      <div class="title title--large">{{ title }}</div>
+      <div class="label label--outline">{{ page }}/{{ pages }}</div>
+    </div>
+    <div class="divider"></div>
+    <div class="flex flex--row flex--space-between">
+      <div class="label">{{ meta }}</div>
+      <div class="label">{{ source }}</div>
+    </div>
+  </div>
+
+  <div class="stretch">
+    <div class="title title--small text--uppercase">{{ section }}</div>
+    <div class="grid {% if section contains 'Zubereitung' %}grid--cols-1{% else %}grid--cols-2{% endif %} gap--small" style="margin-top: 12px">
+      {% for line in lines %}
+        <div class="item">
+          <div class="content">
+            <span class="label label--small">{% if section contains 'Zubereitung' %}{{ start | plus: forloop.index0 }}.{% else %}•{% endif %}</span>
+            <span class="description">{{ line }}</span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="flex flex--row flex--space-between">
+    <span class="label label--small">Küchenblatt</span>
+    <span class="label label--small">Stand {{ trmnl.system.timestamp | date: "%H:%M" }}</span>
+  </div>
+</div>

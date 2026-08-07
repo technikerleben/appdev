@@ -35,3 +35,18 @@ gradle assembleDebug
 ```
 
 Ausgabe: `app/build/outputs/apk/debug/app-debug.apk`
+
+## Küchenblatt für TRMNL
+
+Im Unterordner [`trmnl-recipe`](trmnl-recipe/) liegt zusätzlich eine mobile Webapp, die strukturierte Online-Rezepte importiert und seitenweise an ein privates TRMNL-Plugin überträgt. Der Android-Reader und seine Build-Pipeline bleiben davon unabhängig.
+
+Die Webapp umfasst:
+
+- Rezeptimport über Link oder Android-Teilen-Funktion
+- bearbeitbare Zutaten und Zubereitungsschritte
+- E-Ink-Vorschau mit Seitensteuerung
+- lokale Liste der fünf zuletzt verwendeten Rezepte
+- geschützte Serverfunktionen für Webseitenabruf und TRMNL-Webhook
+- installierbare PWA mit offline verfügbarem Bedienfeld
+
+Deployment und TRMNL-Einrichtung sind in [`trmnl-recipe/README.md`](trmnl-recipe/README.md) beschrieben.
