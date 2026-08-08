@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,7 +27,7 @@ import java.util.Map;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.zip.ZipFile;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -75,12 +76,35 @@ final class EpubBook {
 
         InputStream source = context.getContentResolver().openInputStream(uri);
         if (source == null) throw new IllegalArgumentException(context.getString(R.string.file_access_denied));
+        // ZipInputStream liest nur die lokalen ZIP-Header. Einige verbreitete
+        // EPUB-Konverter schreiben dort nicht normgerechte Data-Descriptoren;
+        // Android beendet das Archiv dann vor den letzten Kapiteln. ZipFile
+        // nutzt dagegen das zentrale Verzeichnis und kann diese EPUBs lesen.
+        File archive = new File(root.getParentFile(), root.getName() + ".source.epub");
+        try {
+            try (InputStream input = source; FileOutputStream output = new FileOutputStream(archive)) {
+                byte[] buffer = new byte[32 * 1024];
+                int read;
+                long total = 0L;
+                while ((read = input.read(buffer)) != -1) {
+                    total += read;
+                    if (total > 100L * 1024L * 1024L) {
+                        throw new IllegalArgumentException(context.getString(R.string.epub_too_large));
+                    }
+                    output.write(buffer, 0, read);
+                }
+            }
+        } catch (Exception error) {
+            archive.delete();
+            throw error;
+        }
         int extractedFiles = 0;
-        try (InputStream input = source; ZipInputStream zip = new ZipInputStream(input)) {
-            ZipEntry entry;
+        try (ZipFile zip = new ZipFile(archive)) {
+            Enumeration<? extends ZipEntry> entries = zip.entries();
             byte[] buffer = new byte[32 * 1024];
             String rootPath = root.getCanonicalPath() + File.separator;
-            while ((entry = zip.getNextEntry()) != null) {
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
                 File target = new File(root, entry.getName());
                 if (!target.getCanonicalPath().startsWith(rootPath)) {
                     throw new SecurityException(context.getString(R.string.invalid_epub_path));
@@ -90,14 +114,16 @@ final class EpubBook {
                 } else {
                     File parent = target.getParentFile();
                     if (parent != null) parent.mkdirs();
-                    try (FileOutputStream output = new FileOutputStream(target)) {
+                    try (InputStream input = zip.getInputStream(entry);
+                         FileOutputStream output = new FileOutputStream(target)) {
                         int read;
-                        while ((read = zip.read(buffer)) != -1) output.write(buffer, 0, read);
+                        while ((read = input.read(buffer)) != -1) output.write(buffer, 0, read);
                     }
                     extractedFiles++;
                 }
-                zip.closeEntry();
             }
+        } finally {
+            archive.delete();
         }
 
         if (extractedFiles == 0) {
@@ -173,6 +199,9 @@ final class EpubBook {
             String media = mediaById.get(id);
             if (href == null || !("application/xhtml+xml".equals(media) || "text/html".equals(media))) continue;
             File chapterFile = new File(contentDir, hrefPath(href));
+            // Ein einzelner defekter Manifest-Eintrag darf das übrige Buch
+            // nicht unlesbar machen.
+            if (!chapterFile.isFile()) continue;
             String key = canonicalRelative(contentDir, chapterFile);
             String chapterTitle = titles.get(key);
             if (chapterTitle == null || chapterTitle.isEmpty()) chapterTitle = context.getString(R.string.section_number, chapters.size() + 1);
