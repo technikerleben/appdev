@@ -106,15 +106,26 @@ final class EpubBook {
         root.setLastModified(System.currentTimeMillis());
         cleanupBookCache(root.getParentFile(), root);
 
-        File containerFile = findIgnoreCase(root, "META-INF/container.xml");
-        if (containerFile == null) {
-            throw new IllegalArgumentException(context.getString(R.string.missing_container));
+        // Manche EPUB-Erzeuger legen das komplette Buch in einen zusätzlichen
+        // Ordner oder vergessen META-INF/container.xml, obwohl eine gültige
+        // OPF-Paketdatei vorhanden ist. Beides lässt sich eindeutig reparieren.
+        File containerFile = findContainer(root);
+        File opf;
+        if (containerFile != null) {
+            Document container = parseXml(containerFile);
+            Element rootFile = first(container, "rootfile");
+            if (rootFile == null) throw new IllegalArgumentException(context.getString(R.string.missing_content));
+            File packageRoot = containerFile.getParentFile().getParentFile();
+            opf = resolveIgnoreCase(packageRoot, hrefPath(rootFile.getAttribute("full-path")));
+            if (opf == null || !opf.isFile()) {
+                throw new IllegalArgumentException(context.getString(R.string.missing_opf));
+            }
+        } else {
+            opf = findPackageDocument(root);
+            if (opf == null) {
+                throw new IllegalArgumentException(context.getString(R.string.missing_package));
+            }
         }
-        Document container = parseXml(containerFile);
-        Element rootFile = first(container, "rootfile");
-        if (rootFile == null) throw new IllegalArgumentException(context.getString(R.string.missing_content));
-        File opf = new File(root, Uri.decode(rootFile.getAttribute("full-path")));
-        if (!opf.isFile()) throw new IllegalArgumentException(context.getString(R.string.missing_opf));
         Document packageDoc = parseXml(opf);
         File contentDir = opf.getParentFile();
 
@@ -341,6 +352,106 @@ final class EpubBook {
             current = match;
         }
         return current;
+    }
+
+    private static File findContainer(File root) {
+        File direct = findIgnoreCase(root, "META-INF/container.xml");
+        if (direct != null && direct.isFile()) return direct;
+        return findNestedFile(root, "container.xml", 0);
+    }
+
+    private static File findPackageDocument(File root) {
+        List<File> candidates = new ArrayList<>();
+        collectFiles(root, candidates, ".opf", 0);
+        // Bevorzugt die flachste Paketdatei; bei gleicher Tiefe zuerst die
+        // übliche content.opf. So werden eingebettete Zusatzpakete vermieden.
+        candidates.sort((left, right) -> {
+            int depthOrder = Integer.compare(pathDepth(left), pathDepth(right));
+            if (depthOrder != 0) return depthOrder;
+            boolean leftContent = left.getName().equalsIgnoreCase("content.opf");
+            boolean rightContent = right.getName().equalsIgnoreCase("content.opf");
+            if (leftContent != rightContent) return leftContent ? -1 : 1;
+            return left.getPath().compareToIgnoreCase(right.getPath());
+        });
+        for (File candidate : candidates) {
+            try {
+                Document document = parseXml(candidate);
+                Element element = document.getDocumentElement();
+                String localName = element == null ? null : element.getLocalName();
+                String nodeName = element == null ? null : element.getNodeName();
+                if ("package".equalsIgnoreCase(localName) || "package".equalsIgnoreCase(nodeName)) {
+                    return candidate;
+                }
+            } catch (Exception ignored) { }
+        }
+        return null;
+    }
+
+    private static File findNestedFile(File directory, String fileName, int depth) {
+        if (depth > 12) return null;
+        File[] children = directory.listFiles();
+        if (children == null) return null;
+        for (File child : children) {
+            if (child.isFile() && child.getName().equalsIgnoreCase(fileName)) {
+                if (child.getParentFile() != null && child.getParentFile().getName().equalsIgnoreCase("META-INF")) {
+                    return child;
+                }
+            }
+        }
+        for (File child : children) {
+            if (child.isDirectory()) {
+                File match = findNestedFile(child, fileName, depth + 1);
+                if (match != null) return match;
+            }
+        }
+        return null;
+    }
+
+    private static void collectFiles(File directory, List<File> files, String suffix, int depth) {
+        if (depth > 12 || files.size() >= 32) return;
+        File[] children = directory.listFiles();
+        if (children == null) return;
+        for (File child : children) {
+            if (child.isFile() && child.getName().toLowerCase(Locale.ROOT).endsWith(suffix)) files.add(child);
+        }
+        for (File child : children) {
+            if (child.isDirectory()) collectFiles(child, files, suffix, depth + 1);
+        }
+    }
+
+    private static int pathDepth(File file) {
+        int depth = 0;
+        File current = file;
+        while ((current = current.getParentFile()) != null) depth++;
+        return depth;
+    }
+
+    private static File resolveIgnoreCase(File root, String relativePath) throws Exception {
+        File canonicalRoot = root.getCanonicalFile();
+        File exact = new File(canonicalRoot, relativePath).getCanonicalFile();
+        String rootPrefix = canonicalRoot.getPath() + File.separator;
+        if (!exact.getPath().startsWith(rootPrefix)) return null;
+        if (exact.isFile()) return exact;
+
+        File current = canonicalRoot;
+        String normalized = relativePath.replace('\\', '/');
+        for (String part : normalized.split("/")) {
+            if (part.isEmpty() || ".".equals(part)) continue;
+            if ("..".equals(part)) return null;
+            File[] children = current.listFiles();
+            if (children == null) return null;
+            File match = null;
+            for (File child : children) {
+                if (child.getName().equalsIgnoreCase(part)) {
+                    match = child;
+                    break;
+                }
+            }
+            if (match == null) return null;
+            current = match;
+        }
+        File resolved = current.getCanonicalFile();
+        return resolved.getPath().startsWith(rootPrefix) ? resolved : null;
     }
 
     private static Element first(Document doc, String localName) {
