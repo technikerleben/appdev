@@ -40,7 +40,7 @@
     <string name="no_results">Keine Treffer</string>
     <string name="query_not_found">„%1$s“ wurde im Buch nicht gefunden.</string>
     <plurals name="result_count"><item quantity="one">Ein Treffer</item><item quantity="other">%d Treffer</item></plurals>
-    <string name="font_size">Schriftgröße: %1$d px</string>
+    <string name="font_size">Schriftgröße: %1$d pt</string>
     <string name="line_height">Zeilenabstand: %1$.1f</string>
     <string name="margin">Seitenrand: %1$d px</string>
     <string name="font_family">Schriftart</string>

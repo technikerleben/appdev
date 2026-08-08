@@ -1,5 +1,12 @@
 # Änderungsverlauf
 
+## 1.4.3
+
+### Geändert
+
+- Die Schriftgröße lässt sich zwischen 8 und 24 pt einstellen.
+- Vorhandene Schriftgrößen aus älteren Versionen werden automatisch in die neue Einheit umgerechnet.
+
 ## 1.4.0
 
 ### Behoben

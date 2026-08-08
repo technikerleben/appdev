@@ -880,8 +880,11 @@ public class MainActivity extends Activity {
         panel.setPadding(dp(22), dp(4), dp(22), 0);
 
         TextView fontSizeLabel = label(panel, getString(R.string.font_size, readerPreferences.fontSize));
-        SeekBar fontSize = seek(panel, readerPreferences.fontSize - 14, 20);
-        fontSize.setOnSeekBarChangeListener(listener(value -> fontSizeLabel.setText(getString(R.string.font_size, value + 14))));
+        SeekBar fontSize = seek(panel,
+                readerPreferences.fontSize - ReaderPreferences.MIN_FONT_SIZE_PT,
+                ReaderPreferences.MAX_FONT_SIZE_PT - ReaderPreferences.MIN_FONT_SIZE_PT);
+        fontSize.setOnSeekBarChangeListener(listener(value -> fontSizeLabel.setText(getString(
+                R.string.font_size, value + ReaderPreferences.MIN_FONT_SIZE_PT))));
 
         TextView lineLabel = label(panel, getString(R.string.line_height, readerPreferences.lineHeight));
         SeekBar line = seek(panel, Math.round((readerPreferences.lineHeight - 1.2f) * 10), 10);
@@ -920,7 +923,7 @@ public class MainActivity extends Activity {
                 .setPositiveButton(R.string.apply, (dialog, which) -> {
                     savePositionNow();
                     restoreRatio = scrollRatio();
-                    readerPreferences.fontSize = fontSize.getProgress() + 14;
+                    readerPreferences.fontSize = fontSize.getProgress() + ReaderPreferences.MIN_FONT_SIZE_PT;
                     readerPreferences.lineHeight = 1.2f + line.getProgress() / 10f;
                     readerPreferences.margin = margin.getProgress() + 8;
                     readerPreferences.font = fonts.getSelectedItemPosition();
@@ -1136,7 +1139,8 @@ public class MainActivity extends Activity {
 
                 @Override
                 public boolean onScale(ScaleGestureDetector detector) {
-                    scaledFontSize = Math.max(14f, Math.min(34f, scaledFontSize * detector.getScaleFactor()));
+                    scaledFontSize = Math.max(ReaderPreferences.MIN_FONT_SIZE_PT,
+                            Math.min(ReaderPreferences.MAX_FONT_SIZE_PT, scaledFontSize * detector.getScaleFactor()));
                     return true;
                 }
 

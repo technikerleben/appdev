@@ -265,7 +265,7 @@ final class EpubBook {
         int effectiveFontSize = Math.round(preferences.fontSize * preferences.systemFontScale);
         String bodyTypography = preferences.publisherLayout ? "" :
                 "font-family:" + preferences.fontFamily + "!important;font-size:" + effectiveFontSize +
-                "px!important;line-height:" + preferences.lineHeight + "!important;";
+                "pt!important;line-height:" + preferences.lineHeight + "!important;";
         String bodyExtra = preferences.publisherLayout ? "" : "overflow-wrap:anywhere;";
         String readerLayout = preferences.publisherLayout ? "" :
                 "p{margin:.65em 0}h1,h2,h3,h4,figure,img,svg,video{break-inside:avoid}" +

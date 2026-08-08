@@ -3,6 +3,10 @@ package de.technikerleben.epubreader;
 import android.content.SharedPreferences;
 
 final class ReaderPreferences {
+    static final int MIN_FONT_SIZE_PT = 8;
+    static final int MAX_FONT_SIZE_PT = 24;
+    static final int DEFAULT_FONT_SIZE_PT = 15;
+
     int fontSize;
     int margin;
     float lineHeight;
@@ -19,7 +23,20 @@ final class ReaderPreferences {
 
     static ReaderPreferences load(SharedPreferences preferences) {
         ReaderPreferences result = new ReaderPreferences();
-        result.fontSize = preferences.getInt("font_size", 20);
+        boolean storedInPoints = preferences.getBoolean("font_size_points", false);
+        if (storedInPoints) {
+            result.fontSize = preferences.getInt("font_size", DEFAULT_FONT_SIZE_PT);
+        } else if (preferences.contains("font_size")) {
+            // Releases up to 1.4.2 stored CSS pixels. One CSS point is 4/3 px.
+            result.fontSize = Math.round(preferences.getInt("font_size", 20) * 0.75f);
+        } else {
+            result.fontSize = DEFAULT_FONT_SIZE_PT;
+        }
+        result.fontSize = clampFontSize(result.fontSize);
+        preferences.edit()
+                .putInt("font_size", result.fontSize)
+                .putBoolean("font_size_points", true)
+                .apply();
         result.margin = preferences.getInt("margin", 18);
         result.lineHeight = preferences.getFloat("line_height", 1.6f);
         result.theme = preferences.getInt("theme", 0);
@@ -32,8 +49,10 @@ final class ReaderPreferences {
     }
 
     void save(SharedPreferences preferences) {
+        fontSize = clampFontSize(fontSize);
         preferences.edit()
                 .putInt("font_size", fontSize)
+                .putBoolean("font_size_points", true)
                 .putInt("margin", margin)
                 .putFloat("line_height", lineHeight)
                 .putInt("theme", theme)
@@ -60,5 +79,9 @@ final class ReaderPreferences {
         foreground = themes[theme][1];
         link = themes[theme][2];
         fontFamily = fonts[font];
+    }
+
+    private static int clampFontSize(int value) {
+        return Math.max(MIN_FONT_SIZE_PT, Math.min(value, MAX_FONT_SIZE_PT));
     }
 }

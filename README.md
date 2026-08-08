@@ -2,7 +2,7 @@
 
 Ein schlanker EPUB-Reader für Android 8 bis Android 15 mit Schwerpunkt auf seitenweisem, ablenkungsfreiem Lesen. Bücher, Lesepositionen und Einstellungen bleiben lokal. Nur die optionale Morgenblatt-Funktion greift auf den fest erlaubten Feed zu.
 
-Aktuelle Version: **1.4.0**
+Aktuelle Version: **1.4.3**
 
 ## Funktionen
 
@@ -13,7 +13,7 @@ Aktuelle Version: **1.4.0**
 - buchweite Suche mit Trefferliste
 - Bibliothek mit Cover, Autor, Lesefortschritt und zwölf zuletzt gelesenen Büchern
 - Lesezeichen und automatische Wiederherstellung der Leseposition
-- Schriftgröße, Systemschrift-Skalierung, Zeilenabstand, Seitenrand und vier Schriftarten
+- Schriftgröße von 8 bis 24 pt, Systemschrift-Skalierung, Zeilenabstand, Seitenrand und vier Schriftarten
 - fünf Farbschemata sowie optionales Verlagslayout
 - Zweispaltenansicht ab 600 dp, beispielsweise im Querformat oder auf Tablets
 - Systemhelligkeit und optionales Wachhalten des Bildschirms
