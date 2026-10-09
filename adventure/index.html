@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#17152c">
+  <meta name="description" content="Ein kleines Point-and-Click-Pixelabenteuer mit Rätseln, Inventar und Dialogen.">
+  <title>Das Rätsel von Nebelhafen – Pixeladventure</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./game.js" defer></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="mast">
+      <div><p class="eyebrow">EIN KLEINES POINT-AND-CLICK-ABENTEUER</p><h1>Das Rätsel von <span>Nebelhafen</span></h1></div>
+      <div class="mast-actions"><button id="helpBtn" class="utility" type="button">? Hilfe</button><button id="resetBtn" class="utility" type="button">↻ Neustart</button></div>
+    </header>
+
+    <main class="machine">
+      <div class="monitor">
+        <div class="screen-top"><span class="lamp"></span><span id="location">NEBELHAFEN · ALTE MOLE</span><span class="chapter">KAPITEL 1 / DAS LICHT</span></div>
+        <div class="picture">
+          <canvas id="scene" width="384" height="216" tabindex="0" aria-label="Spielszene, anklickbare Bereiche. Nutze die Knöpfe unter dem Bild, um mit der Szene zu interagieren."></canvas>
+          <div id="ending" class="ending" hidden>
+            <div class="ending-content"><div class="ending-star">✦</div><h2>Das Licht ist zurück!</h2><p>Die Schiffe finden wieder sicher nach Nebelhafen. Und irgendjemand schuldet dir jetzt einen sehr großen Kakao.</p><button id="playAgain" type="button">Nochmal spielen</button></div>
+          </div>
+        </div>
+        <div class="subtitle" aria-live="polite"><span class="talk-icon">▸</span><span id="narration">Ein Leuchtturm ohne Licht. Ein Hafen voller Geheimnisse. Das wird eine lange Nacht.</span></div>
+      </div>
+
+      <section class="console" aria-label="Spielsteuerung">
+        <div class="verbs-block"><div class="section-label">WAS MÖCHTEST DU TUN?</div><div id="verbs" class="verbs">
+          <button type="button" data-verb="walk" class="active" aria-pressed="true">↗ Gehe zu</button>
+          <button type="button" data-verb="look" aria-pressed="false">◉ Sieh an</button>
+          <button type="button" data-verb="take" aria-pressed="false">＋ Nimm</button>
+          <button type="button" data-verb="use" aria-pressed="false">✧ Benutze</button>
+          <button type="button" data-verb="talk" aria-pressed="false">☷ Rede mit</button>
+        </div><div class="key-tip">Tipp: 1–5 wechseln die Aktion · ESC hebt die Auswahl auf</div></div>
+        <div class="inventory-block"><div class="inv-header"><span class="section-label">DEINE TASCHE</span><button id="hintBtn" class="hint" type="button">✦ Hinweis</button></div><div id="inventory" class="inventory"><span class="empty">Noch nichts eingesteckt …</span></div><p id="selection" class="selection">Wähle eine Aktion und klicke in die Szene.</p></div>
+      </section>
+    </main>
+    <footer><span>NEBELHAFEN.EXE · EIN EIGENSTÄNDIGES RETRO-ADVENTURE</span><span>Speichert automatisch auf diesem Gerät.</span></footer>
+  </div>
+
+  <div id="dialog" class="dialog-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+    <section class="dialog-card"><div class="dialog-name" id="dialogTitle">KÄPT'N MIRA</div><p id="dialogText"></p><div id="dialogChoices" class="dialog-choices"></div></section>
+  </div>
+  <div id="helpModal" class="dialog-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <section class="dialog-card"><div class="dialog-name" id="helpTitle">SO SPIELST DU</div><p>In Nebelhafen ist der Leuchtturm ausgefallen. Finde heraus, was fehlt, und bring das Licht wieder zum Leuchten!</p><p>Wähle unten <strong>Sieh an</strong>, <strong>Nimm</strong>, <strong>Benutze</strong> oder <strong>Rede mit</strong> und klicke auf Dinge im Bild. Gegenstände in deiner Tasche kannst du anklicken und anschließend auf etwas anwenden. Zwei Gegenstände kannst du auch direkt kombinieren.</p><p>Du kannst alle Rätsel ohne Zeitdruck lösen. Der <strong>Hinweis</strong>-Knopf hilft dir, falls du feststeckst.</p><div class="dialog-choices"><button id="closeHelp" type="button">Los geht's!</button></div></section>
+  </div>
+</body>
+</html>
