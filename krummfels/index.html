@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#181626">
+  <meta name="description" content="Schloss Krummfels: eine spielbare Fantasy-Point-and-Click-Demo mit Fenna, Rätseln und sprechendem Raben.">
+  <title>Schloss Krummfels · Die Sache mit der Krone</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./game.js" defer></script>
+</head>
+<body>
+<div class="app">
+  <header class="masthead">
+    <div class="branding">
+      <div class="kicker">EIN PIXEL-ADVENTURE IN EINEM REICH MIT REPARATURSTAU</div>
+      <h1>Schloss <span>Krummfels</span></h1>
+      <div class="tagline">Kapitel 1: Die Sache mit der Krone</div>
+    </div>
+    <div class="topbuttons">
+      <button class="small-btn" id="storyBtn" type="button">☷ Geschichte</button>
+      <button class="small-btn" id="resetBtn" type="button">↺ Neustart</button>
+    </div>
+  </header>
+
+  <main class="gamebox">
+    <div class="screen-header">
+      <span class="pixel-led"></span><strong id="sceneTitle">BURGHOF</strong>
+      <span id="progress" class="progress">DIE SUCHE BEGINNT · 0/4</span>
+    </div>
+    <div class="view">
+      <canvas id="world" width="480" height="270" tabindex="0" aria-label="Pixelgrafische Spielszene. Die anklickbaren Orte sind auch als Schaltflächen direkt darunter aufgeführt."></canvas>
+      <div class="hover-label" id="hoverLabel" hidden></div>
+    </div>
+    <div class="dialogue-strip" aria-live="polite">
+      <span class="speaker" id="speaker">FENNA</span>
+      <span id="line">Ein kaputtes Schloss, eine verschwundene Krone und ich mittendrin. Ein ganz normaler Dienstag.</span>
+    </div>
+
+    <div class="navigation">
+      <span class="area-title">SCHLOSSPLAN</span>
+      <div class="room-buttons" id="rooms">
+        <button type="button" data-room="yard">Burghof</button>
+        <button type="button" data-room="kitchen">Küche</button>
+        <button type="button" data-room="hall">Großer Saal <span aria-hidden="true">♙</span></button>
+      </div>
+    </div>
+
+    <div class="control-grid">
+      <section class="actions">
+        <h2>WAS TUN?</h2>
+        <div class="verbs" id="verbs">
+          <button type="button" data-verb="look">◉ Ansehen</button>
+          <button type="button" data-verb="take">＋ Nehmen</button>
+          <button type="button" data-verb="use">✧ Benutzen</button>
+          <button type="button" data-verb="talk">☷ Reden</button>
+        </div>
+        <p class="mini">1–4: Aktionen · Esc: Auswahl löschen</p>
+        <h2 class="targets-title">HIER IM RAUM</h2>
+        <div id="hotspots" class="hotspots"></div>
+      </section>
+      <section class="bag">
+        <div class="section-heading">
+          <h2>FENNAS BODENLOSE TASCHE <span>∞</span></h2>
+          <button id="hintBtn" class="hint-btn" type="button">✦ Tipp</button>
+        </div>
+        <p class="bag-quote">„Nur ausgeliehen!“ — Fenna über Baldrians Tasche</p>
+        <div id="inventory" class="inventory" aria-label="Gesammelte Gegenstände"></div>
+        <div id="actionHint" class="action-hint">Wähle eine Aktion und tippe dann auf etwas im Bild.</div>
+        <div class="objectives">
+          <span class="area-title">DEIN AUFTRAG</span>
+          <p id="objective">Finde einen Weg in den großen Saal. Dort weiß vielleicht jemand etwas über Jorin.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+  <footer>
+    <span>KRUMMFELS.EXE · INTERAKTIVER PROTOTYP · OHNE ZEITDRUCK</span>
+    <span>Spielstand wird nur in diesem Browser gespeichert.</span>
+  </footer>
+</div>
+
+<div class="modal-backdrop" id="storyModal" hidden role="dialog" aria-modal="true" aria-labelledby="storyTitle">
+  <section class="modal">
+    <div class="modal-top"><span class="stamp">PROLOG</span><button class="icon-btn" id="closeStory" aria-label="Schließen">×</button></div>
+    <h2 id="storyTitle">Drei Jahre und ein ziemlich schlechter Plan</h2>
+    <p>Vor drei Jahren verschwand <strong>Jorin</strong>, Fennas älterer Bruder. Er wollte Ritter werden, Drachen finden und möglichst viele Lieder über sich selbst hören. Als Knappe trat er in den Dienst von Schloss Krummfels. Dann kamen keine Briefe mehr.</p>
+    <p>Jetzt arbeitet Fenna unter falschen Angaben als Schlossbotin. Ihr Vorhaben: herausfinden, was mit Jorin geschah. Dummerweise hat ausgerechnet heute die königliche Krone ihre Kündigung eingereicht.</p>
+    <p>Und die Tasche, die Fenna bei sich trägt? Die gehört Magister Baldrian. <em>Rein rechtlich ist der Besitzstand noch ungeklärt.</em></p>
+    <div class="modal-buttons"><button id="beginBtn" class="primary">Auf nach Krummfels →</button></div>
+  </section>
+</div>
+<div class="modal-backdrop" id="talkModal" hidden role="dialog" aria-modal="true" aria-labelledby="talkTitle">
+  <section class="modal">
+    <div class="modal-top"><span class="stamp" id="talkTitle">GESPRÄCH</span><button id="closeTalk" class="icon-btn" aria-label="Gespräch beenden">×</button></div>
+    <p class="dialogue-body" id="talkBody"></p>
+    <div class="choices" id="talkChoices"></div>
+  </section>
+</div>
+<div class="modal-backdrop" id="winModal" hidden role="dialog" aria-modal="true" aria-labelledby="winTitle">
+  <section class="modal finale">
+    <span class="stamp">KAPITEL 1 GESCHAFFT</span>
+    <div class="win-mark">✦</div>
+    <h2 id="winTitle">Jorin war nicht einfach fort.</h2>
+    <p>In Eberhards Notizen steht: <em>„Knappe Jorin – letzte Sichtung: Westflügel. Vermerk des Hofmagiers: DRACHENZEICHEN. Akte ins alte Archiv verlegen.“</em></p>
+    <p>Fenna hat ihre erste echte Spur. Und das Schloss scheint mehr Geheimnisse als intakte Dächer zu haben …</p>
+    <div class="modal-buttons">
+      <button id="continueBtn" class="primary" type="button">Weiter erkunden</button>
+      <button id="restartEndBtn" type="button">Nochmal beginnen</button>
+    </div>
+    <p class="fineprint">Ende der ersten Demo – Archiv und Westflügel werden in späteren Kapiteln erkundet.</p>
+  </section>
+</div>
+</body>
+</html>
