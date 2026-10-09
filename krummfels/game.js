@@ -128,7 +128,6 @@ function drawInv(){
  "Aktion: "+({look:"Ansehen",take:"Nehmen",use:"Benutzen",talk:"Reden"}[s.verb])+". Klicke im Bild oder auf einen Ort darunter.";
 }
 function selectItem(id){
- if(s.verb==="look" && !s.item){fenna(items[id].text);return;}
  if(s.item===id){s.item=null;drawInv();return;}
  if(s.item && s.item!==id){fenna("Diese beiden Dinge zusammen ergeben vermutlich nur eine neue Art von Unordnung. Eine beeindruckende Leistung.");s.item=null;drawInv();return;}
  s.item=id;s.verb="use";document.querySelectorAll("[data-verb]").forEach(b=>{const selected=b.dataset.verb==="use";b.classList.toggle("selected",selected);b.setAttribute("aria-pressed",String(selected));});drawInv();
@@ -260,7 +259,6 @@ function interact(id){
  }
  if(s.verb==="use"&&s.item){useItem(id);return;}
  if(id==="kitchenDoor"||id==="yardDoor"||id==="hallExit"||id==="hallDoor"){
-  if(s.verb==="look"){fenna(descriptions[id]);return;}
   if(id==="kitchenDoor")return navigate("kitchen");
   if(id==="yardDoor"||id==="hallExit")return navigate("yard");
   return navigate("hall");
