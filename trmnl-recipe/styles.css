@@ -107,3 +107,12 @@ code { background: #eee; padding: 2px 5px; border-radius: 4px; }
   .workspace, .message { animation: rise .28s ease-out; }
   @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
 }
+
+/* Einseitige Rezeptübersicht: Zutaten haben immer Vorrang. */
+.screen-overview { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, .7fr); gap: 4%; align-items: start; }
+.screen-column { min-width: 0; }
+.screen-column .screen-section { border-bottom: 1px solid #111; padding-bottom: 1.5%; }
+.screen-ingredients .screen-list { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 4%; row-gap: clamp(2px, .55vw, 5px); font-size: clamp(8px, 1.45vw, 12px); line-height: 1.08; }
+.screen-preparation .screen-list { grid-template-columns: 1fr; row-gap: clamp(3px, .7vw, 6px); font-size: clamp(8px, 1.45vw, 12px); line-height: 1.12; }
+.screen-ingredients.density-compact .screen-list { font-size: clamp(7px, 1.25vw, 10px); line-height: 1.02; row-gap: 2px; }
+.screen-ingredients.density-tight .screen-list { font-size: clamp(6px, 1.08vw, 9px); line-height: 1; row-gap: 1px; }
