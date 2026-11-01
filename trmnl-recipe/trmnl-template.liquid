@@ -1,45 +1,58 @@
-<div class="layout layout--col gap--small">
-  <div>
-    <div class="title title--large">{{ title }}</div>
-    <div class="divider"></div>
-    <div class="flex flex--row flex--space-between">
-      <div class="label">{{ meta }}</div>
-      <div class="label">{{ source }}</div>
-    </div>
-  </div>
+<style>
+  .kb { width: 100%; height: 100%; display: flex; flex-direction: column; gap: 10px; color: #000; font-family: Arial, Helvetica, sans-serif; }
+  .kb-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; border-bottom: 4px solid #000; padding: 2px 2px 9px; }
+  .kb-title { min-width: 0; font-size: 31px; line-height: 1.02; font-weight: 800; letter-spacing: -0.6px; }
+  .kb-meta { flex: none; border: 2px solid #000; border-radius: 999px; padding: 5px 11px 4px; font-size: 15px; line-height: 1; font-weight: 700; white-space: nowrap; }
+  .kb-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 11px; }
+  .kb-panel { min-width: 0; border: 2px solid #000; border-radius: 9px; padding: 10px 12px; overflow: hidden; }
+  .kb-heading { display: inline-block; margin: -1px 0 9px; border-radius: 4px; background: #000; color: #fff; padding: 4px 10px 3px; font-size: 18px; line-height: 1; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase; }
+  .kb-ingredients { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 16px; row-gap: 6px; }
+  .kb-ingredient { min-width: 0; display: flex; align-items: flex-start; gap: 6px; font-size: 16px; line-height: 1.14; font-weight: 600; }
+  .kb-bullet { flex: none; width: 9px; height: 9px; margin-top: 4px; border-radius: 50%; background: #000; }
+  .kb-density-compact .kb-ingredients { row-gap: 4px; }
+  .kb-density-compact .kb-ingredient { font-size: 14px; line-height: 1.08; }
+  .kb-density-tight .kb-ingredients { column-gap: 11px; row-gap: 2px; }
+  .kb-density-tight .kb-ingredient { font-size: 12px; line-height: 1.02; }
+  .kb-steps { display: grid; gap: 7px; }
+  .kb-step { min-width: 0; display: grid; grid-template-columns: 25px minmax(0, 1fr); gap: 7px; align-items: start; font-size: 15px; line-height: 1.15; font-weight: 600; }
+  .kb-step-number { width: 25px; height: 25px; display: grid; place-items: center; border: 2px solid #000; border-radius: 50%; font-size: 11px; line-height: 1; font-weight: 800; }
+  .kb-footer { min-height: 14px; display: flex; justify-content: space-between; gap: 12px; padding: 0 3px; font-size: 11px; line-height: 1; font-weight: 700; }
+</style>
 
-  <div class="flex flex--row gap--medium stretch" style="margin-top: 10px">
-    <div style="width: 62%; min-width: 0">
-      <div class="title title--small text--uppercase">Zutaten</div>
-      <div class="grid grid--cols-2 gap--xsmall" style="margin-top: 8px">
+<div class="kb">
+  <header class="kb-header">
+    <div class="kb-title">{{ title }}</div>
+    <div class="kb-meta">{{ meta }}</div>
+  </header>
+
+  <main class="kb-body">
+    <section class="kb-panel kb-density-{{ ingredient_density }}">
+      <div class="kb-heading">Zutaten</div>
+      <div class="kb-ingredients">
         {% for ingredient in ingredients %}
-          <div class="item" style="{% if ingredient_density == 'tight' %}margin-bottom: 1px{% elsif ingredient_density == 'compact' %}margin-bottom: 2px{% endif %}">
-            <div class="content" style="{% if ingredient_density == 'tight' %}font-size: 11px; line-height: 1.05{% elsif ingredient_density == 'compact' %}font-size: 13px; line-height: 1.08{% endif %}">
-              <span class="label label--small">{{ ingredient.marker }}</span>
-              <span class="description">{{ ingredient.text }}</span>
-            </div>
+          <div class="kb-ingredient">
+            <span class="kb-bullet"></span>
+            <span>{{ ingredient.text }}</span>
           </div>
         {% endfor %}
       </div>
-    </div>
+    </section>
 
-    <div style="width: 38%; min-width: 0">
-      <div class="title title--small text--uppercase">Zubereitung{% if preparation_shortened %} · kurz{% endif %}</div>
-      <div class="grid grid--cols-1 gap--xsmall" style="margin-top: 8px">
+    <section class="kb-panel">
+      <div class="kb-heading">Zubereitung{% if preparation_shortened %} · kurz{% endif %}</div>
+      <div class="kb-steps">
         {% for step in preparation %}
-          <div class="item">
-            <div class="content" style="font-size: 13px; line-height: 1.1">
-              <span class="label label--small">{{ step.marker }}</span>
-              <span class="description">{{ step.text }}</span>
-            </div>
+          <div class="kb-step">
+            <span class="kb-step-number">{{ step.marker | remove: "." }}</span>
+            <span>{{ step.text }}</span>
           </div>
         {% endfor %}
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 
-  <div class="flex flex--row flex--space-between">
-    <span class="label label--small">Küchenblatt · Zutaten vollständig</span>
-    <span class="label label--small">Stand {{ trmnl.system.timestamp | date: "%H:%M" }}</span>
-  </div>
+  <footer class="kb-footer">
+    <span>{{ source }}</span>
+    <span>Küchenblatt · Zutaten vollständig</span>
+  </footer>
 </div>
