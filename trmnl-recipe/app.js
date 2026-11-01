@@ -2,13 +2,13 @@
 
 const $ = (selector) => document.querySelector(selector);
 const STORAGE = { webhook: "kuechenblatt.webhook", recent: "kuechenblatt.recent" };
-const state = { recipe: null, pages: [], pageIndex: 0 };
+const state = { recipe: null, overview: null };
 
 const elements = {
   importForm: $("#importForm"), recipeUrl: $("#recipeUrl"), importButton: $("#importButton"), message: $("#message"),
   workspace: $("#workspace"), workspaceTitle: $("#workspaceTitle"), editor: $("#editor"), editToggle: $("#editToggleButton"),
   title: $("#titleInput"), yield: $("#yieldInput"), time: $("#timeInput"), ingredients: $("#ingredientsInput"), instructions: $("#instructionsInput"),
-  display: $("#deviceScreen"), previous: $("#previousButton"), next: $("#nextButton"), pageLabel: $("#pageLabel"), send: $("#sendButton"),
+  display: $("#deviceScreen"), send: $("#sendButton"),
   settingsButton: $("#settingsButton"), settingsDialog: $("#settingsDialog"), webhook: $("#webhookInput"), saveSettings: $("#saveSettingsButton"),
   recentSection: $("#recentSection"), recentList: $("#recentList"), recentTemplate: $("#recentTemplate"), clearRecent: $("#clearRecentButton")
 };
@@ -28,15 +28,16 @@ function hostname(url) {
 }
 
 function metaFor(recipe) {
-  return [recipe.yield, recipe.totalTime].filter(Boolean).join("  ·  ") || "Rezeptansicht";
+  return [recipe.yield, recipe.totalTime].filter(Boolean).join("  ·  ") || "Rezeptübersicht";
 }
 
-function buildPages(recipe) {
-  const drafts = window.RecipePagination.paginateRecipeContent(recipe);
-  return drafts.map((draft, index) => ({
-    ...draft, title: recipe.title, meta: metaFor(recipe), page: index + 1, pages: drafts.length,
+function buildOverview(recipe) {
+  return {
+    ...window.RecipePagination.buildRecipeOverview(recipe),
+    title: recipe.title,
+    meta: metaFor(recipe),
     source: recipe.sourceName || hostname(recipe.sourceUrl)
-  }));
+  };
 }
 
 function populateEditor(recipe) {
@@ -63,32 +64,45 @@ function textElement(tag, className, text) {
   return node;
 }
 
-function renderScreen() {
-  const page = state.pages[state.pageIndex];
-  if (!page) return;
-  elements.display.replaceChildren();
-  const top = document.createElement("div");
-  top.className = "screen-top";
-  top.append(textElement("div", "screen-title", page.title), textElement("div", "screen-page", `${page.page}/${page.pages}`));
-  elements.display.append(top, textElement("div", "screen-meta", page.meta), textElement("div", "screen-section", page.section));
+function entryList(className, entries) {
   const list = document.createElement("ol");
-  list.className = `screen-list ${page.kind === "steps" ? "steps" : ""}`;
-  page.entries.forEach((entry) => {
+  list.className = className;
+  entries.forEach((entry) => {
     const item = document.createElement("li");
     item.append(textElement("b", "", entry.marker), textElement("span", "", entry.text));
     list.append(item);
   });
-  elements.display.append(list);
+  return list;
+}
+
+function renderScreen() {
+  const page = state.overview;
+  if (!page) return;
+  elements.display.replaceChildren();
+  const top = document.createElement("div");
+  top.className = "screen-top";
+  top.append(textElement("div", "screen-title", page.title));
+  elements.display.append(top, textElement("div", "screen-meta", page.meta));
+
+  const overview = document.createElement("div");
+  overview.className = "screen-overview";
+  const ingredients = document.createElement("section");
+  ingredients.className = `screen-column screen-ingredients density-${page.ingredientDensity}`;
+  ingredients.append(textElement("div", "screen-section", "Zutaten"), entryList("screen-list", page.ingredients));
+  const preparation = document.createElement("section");
+  preparation.className = "screen-column screen-preparation";
+  preparation.append(
+    textElement("div", "screen-section", page.preparationShortened ? "Zubereitung · kurz" : "Zubereitung"),
+    entryList("screen-list steps", page.preparation)
+  );
+  overview.append(ingredients, preparation);
+  elements.display.append(overview);
   if (page.source) elements.display.append(textElement("div", "screen-source", page.source));
-  elements.pageLabel.textContent = `${page.page} / ${page.pages}`;
-  elements.previous.disabled = state.pageIndex === 0;
-  elements.next.disabled = state.pageIndex === state.pages.length - 1;
 }
 
 function setRecipe(recipe, save = true) {
   state.recipe = recipe;
-  state.pages = buildPages(recipe);
-  state.pageIndex = 0;
+  state.overview = buildOverview(recipe);
   elements.workspaceTitle.textContent = recipe.title;
   elements.workspace.hidden = false;
   elements.editor.hidden = true;
@@ -134,7 +148,7 @@ async function importRecipe(url) {
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Das Rezept konnte nicht importiert werden.");
     setRecipe(data.recipe);
-    showMessage(`${data.recipe.ingredients.length} Zutaten und ${data.recipe.instructions.length} Schritte wurden übernommen.`, "success");
+    showMessage(`${data.recipe.ingredients.length} Zutaten wurden vollständig übernommen. Die Zubereitung wurde für eine Seite aufbereitet.`, "success");
   } catch (error) {
     showMessage(`${error.message} Du kannst eine andere Rezeptseite versuchen.`, "error");
   } finally {
@@ -143,7 +157,7 @@ async function importRecipe(url) {
   }
 }
 
-async function sendCurrentPage() {
+async function sendOverview() {
   const webhook = localStorage.getItem(STORAGE.webhook) || "";
   if (!webhook) {
     showMessage("Hinterlege zuerst die Webhook-Adresse deines privaten TRMNL-Plugins.", "error");
@@ -155,13 +169,12 @@ async function sendCurrentPage() {
   elements.send.disabled = true;
   elements.send.querySelector("span").textContent = "Wird übertragen …";
   try {
-    const page = state.pages[state.pageIndex];
     const response = await fetch("/api/trmnl", {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ webhook, page })
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ webhook, page: state.overview })
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Die Übertragung ist fehlgeschlagen.");
-    showMessage(`Seite ${page.page} wurde an TRMNL übertragen.`, "success");
+    showMessage("Die einseitige Rezeptübersicht wurde an TRMNL übertragen.", "success");
   } catch (error) { showMessage(error.message, "error"); }
   finally { elements.send.disabled = false; elements.send.querySelector("span").textContent = original; }
 }
@@ -180,9 +193,7 @@ elements.editor.addEventListener("submit", (event) => {
   setRecipe(recipeFromEditor());
   showMessage("Deine Änderungen wurden übernommen.", "success");
 });
-elements.previous.addEventListener("click", () => { if (state.pageIndex > 0) { state.pageIndex--; renderScreen(); } });
-elements.next.addEventListener("click", () => { if (state.pageIndex < state.pages.length - 1) { state.pageIndex++; renderScreen(); } });
-elements.send.addEventListener("click", sendCurrentPage);
+elements.send.addEventListener("click", sendOverview);
 elements.settingsButton.addEventListener("click", () => {
   elements.webhook.value = localStorage.getItem(STORAGE.webhook) || "";
   elements.settingsDialog.showModal();
