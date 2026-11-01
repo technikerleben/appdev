@@ -1,9 +1,6 @@
-<div class="layout layout--col gap--space-between">
+<div class="layout layout--col gap--small">
   <div>
-    <div class="flex flex--row flex--space-between flex--top">
-      <div class="title title--large">{{ title }}</div>
-      <div class="label label--outline">{{ page }}/{{ pages }}</div>
-    </div>
+    <div class="title title--large">{{ title }}</div>
     <div class="divider"></div>
     <div class="flex flex--row flex--space-between">
       <div class="label">{{ meta }}</div>
@@ -11,22 +8,38 @@
     </div>
   </div>
 
-  <div class="stretch">
-    <div class="title title--small text--uppercase">{{ section }}</div>
-    <div class="grid {% if kind == 'steps' %}grid--cols-1{% else %}grid--cols-2{% endif %} gap--small" style="margin-top: 12px">
-      {% for entry in entries %}
-        <div class="item">
-          <div class="content">
-            <span class="label label--small">{{ entry.marker }}</span>
-            <span class="description">{{ entry.text }}</span>
+  <div class="flex flex--row gap--medium stretch" style="margin-top: 10px">
+    <div style="width: 62%; min-width: 0">
+      <div class="title title--small text--uppercase">Zutaten</div>
+      <div class="grid grid--cols-2 gap--xsmall" style="margin-top: 8px">
+        {% for ingredient in ingredients %}
+          <div class="item" style="{% if ingredient_density == 'tight' %}margin-bottom: 1px{% elsif ingredient_density == 'compact' %}margin-bottom: 2px{% endif %}">
+            <div class="content" style="{% if ingredient_density == 'tight' %}font-size: 11px; line-height: 1.05{% elsif ingredient_density == 'compact' %}font-size: 13px; line-height: 1.08{% endif %}">
+              <span class="label label--small">{{ ingredient.marker }}</span>
+              <span class="description">{{ ingredient.text }}</span>
+            </div>
           </div>
-        </div>
-      {% endfor %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <div style="width: 38%; min-width: 0">
+      <div class="title title--small text--uppercase">Zubereitung{% if preparation_shortened %} · kurz{% endif %}</div>
+      <div class="grid grid--cols-1 gap--xsmall" style="margin-top: 8px">
+        {% for step in preparation %}
+          <div class="item">
+            <div class="content" style="font-size: 13px; line-height: 1.1">
+              <span class="label label--small">{{ step.marker }}</span>
+              <span class="description">{{ step.text }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
     </div>
   </div>
 
   <div class="flex flex--row flex--space-between">
-    <span class="label label--small">Küchenblatt</span>
+    <span class="label label--small">Küchenblatt · Zutaten vollständig</span>
     <span class="label label--small">Stand {{ trmnl.system.timestamp | date: "%H:%M" }}</span>
   </div>
 </div>

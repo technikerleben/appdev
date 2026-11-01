@@ -5,93 +5,63 @@
 })(typeof window !== "undefined" ? window : globalThis, function () {
   "use strict";
 
-  function splitText(text, maxChars) {
-    const source = String(text || "").replace(/\s+/g, " ").trim();
-    if (!source) return [];
-    const parts = [];
-    let rest = source;
-    while (rest.length > maxChars) {
-      const window = rest.slice(0, maxChars + 1);
-      const sentence = Math.max(window.lastIndexOf(". "), window.lastIndexOf("! "), window.lastIndexOf("? "), window.lastIndexOf("; "));
-      const word = window.lastIndexOf(" ");
-      const cut = sentence >= Math.floor(maxChars * 0.55) ? sentence + 1 : word >= Math.floor(maxChars * 0.55) ? word : maxChars;
-      parts.push(rest.slice(0, cut).trim());
-      rest = rest.slice(cut).trim();
+  function normalizeText(text) {
+    return String(text || "").replace(/\s+/g, " ").trim();
+  }
+
+  function truncateText(text, maxChars) {
+    const source = normalizeText(text);
+    if (source.length <= maxChars) return source;
+    const window = source.slice(0, maxChars + 1);
+    const sentence = Math.max(window.lastIndexOf(". "), window.lastIndexOf("! "), window.lastIndexOf("? "), window.lastIndexOf("; "));
+    const word = window.lastIndexOf(" ");
+    const cut = sentence >= Math.floor(maxChars * 0.6) ? sentence + 1 : word >= Math.floor(maxChars * 0.6) ? word : maxChars;
+    return `${source.slice(0, cut).trim().replace(/[.,;:!?]+$/, "")} …`;
+  }
+
+  function compactGroup(instructions, maxChars) {
+    const separatorLength = Math.max(0, instructions.length - 1) * 2;
+    const share = Math.max(24, Math.floor((maxChars - separatorLength) / instructions.length));
+    return instructions.map((instruction) => truncateText(instruction, share)).join("; ");
+  }
+
+  function summarizeInstructions(instructions, maxEntries = 6, maxChars = 118) {
+    const source = (instructions || []).map(normalizeText).filter(Boolean);
+    if (!source.length) return { entries: [{ marker: "•", text: "Zubereitung auf der Rezeptseite nachlesen." }], shortened: false };
+    const groupCount = Math.min(maxEntries, source.length);
+    const entries = [];
+    let shortened = source.length > groupCount;
+
+    for (let groupIndex = 0; groupIndex < groupCount; groupIndex += 1) {
+      const start = Math.floor(groupIndex * source.length / groupCount);
+      const end = Math.floor((groupIndex + 1) * source.length / groupCount);
+      const group = source.slice(start, end);
+      const text = compactGroup(group, maxChars);
+      if (text.length < group.join("; ").length) shortened = true;
+      entries.push({ marker: end - start > 1 ? `${start + 1}–${end}.` : `${start + 1}.`, text });
     }
-    if (rest) parts.push(rest);
-    return parts;
+    return { entries, shortened };
   }
 
-  function visualLines(entry, charsPerLine) {
-    return Math.max(1, Math.ceil((String(entry.text || "").length + String(entry.marker || "").length + 1) / charsPerLine));
+  function ingredientDensity(ingredients) {
+    const visualLines = ingredients.reduce((sum, ingredient) => sum + Math.max(1, Math.ceil(ingredient.length / 34)), 0);
+    const rows = Math.ceil(visualLines / 2);
+    if (rows > 12) return "tight";
+    if (rows > 9) return "compact";
+    return "normal";
   }
 
-  function paginateSingleColumn(entries, lineBudget, charsPerLine) {
-    const pages = [];
-    let page = [];
-    let used = 0;
-    for (const entry of entries) {
-      const cost = visualLines(entry, charsPerLine) + 0.35;
-      if (page.length && used + cost > lineBudget) {
-        pages.push(page);
-        page = [];
-        used = 0;
-      }
-      page.push(entry);
-      used += cost;
-    }
-    if (page.length) pages.push(page);
-    return pages;
+  function buildRecipeOverview(recipe) {
+    const ingredients = (recipe.ingredients || []).map(normalizeText).filter(Boolean);
+    const preparation = summarizeInstructions(recipe.instructions || []);
+    return {
+      kind: "overview",
+      ingredients: ingredients.map((text) => ({ marker: "•", text })),
+      preparation: preparation.entries,
+      preparationShortened: preparation.shortened,
+      ingredientDensity: ingredientDensity(ingredients)
+    };
   }
 
-  function paginateTwoColumns(entries, lineBudget, charsPerLine) {
-    const pages = [];
-    let page = [];
-    let used = 0;
-    for (let index = 0; index < entries.length; index += 2) {
-      const pair = entries.slice(index, index + 2);
-      const cost = Math.max(...pair.map((entry) => visualLines(entry, charsPerLine))) + 0.4;
-      if (page.length && used + cost > lineBudget) {
-        pages.push(page);
-        page = [];
-        used = 0;
-      }
-      page.push(...pair);
-      used += cost;
-    }
-    if (page.length) pages.push(page);
-    return pages;
-  }
-
-  function paginateRecipeContent(recipe) {
-    const drafts = [];
-    const ingredientEntries = (recipe.ingredients || []).flatMap((ingredient) =>
-      splitText(ingredient, 90).map((text, index) => ({ marker: index ? "↳" : "•", text }))
-    );
-    const ingredientPages = paginateTwoColumns(ingredientEntries, 8.5, 38);
-    ingredientPages.forEach((entries, index) => drafts.push({
-      section: ingredientPages.length > 1 ? `Zutaten ${index + 1}/${ingredientPages.length}` : "Zutaten",
-      kind: "ingredients",
-      entries
-    }));
-
-    const stepEntries = (recipe.instructions || []).flatMap((instruction, stepIndex) =>
-      splitText(instruction, 230).map((text, partIndex) => ({ marker: partIndex ? "↳" : `${stepIndex + 1}.`, text }))
-    );
-    const stepPages = paginateSingleColumn(stepEntries, 9.5, 66);
-    stepPages.forEach((entries, index) => drafts.push({
-      section: stepPages.length > 1 ? `Zubereitung ${index + 1}/${stepPages.length}` : "Zubereitung",
-      kind: "steps",
-      entries
-    }));
-
-    if (!drafts.length) drafts.push({
-      section: "Rezept",
-      kind: "steps",
-      entries: [{ marker: "•", text: recipe.description || "Noch keine Zutaten oder Schritte eingetragen." }]
-    });
-    return drafts;
-  }
-
-  return { paginateRecipeContent, paginateSingleColumn, paginateTwoColumns, splitText, visualLines };
+  return { buildRecipeOverview, compactGroup, ingredientDensity, normalizeText, summarizeInstructions, truncateText };
 });

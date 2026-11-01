@@ -2,34 +2,33 @@
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { paginateRecipeContent, splitText, visualLines } = require("../trmnl-recipe/pagination");
+const { buildRecipeOverview, ingredientDensity, summarizeInstructions, truncateText } = require("../trmnl-recipe/pagination");
 
-test("splits unusually long text without losing words", () => {
-  const source = "Ein sehr langer Arbeitsschritt. ".repeat(20).trim();
-  const parts = splitText(source, 120);
-  assert.ok(parts.length > 1);
-  assert.equal(parts.join(" "), source);
-  assert.ok(parts.every((part) => part.length <= 120));
+test("shortens text at a readable boundary", () => {
+  const source = "Eine sehr lange Erklärung mit mehreren wichtigen Angaben und einem sinnvollen Ende.";
+  const shortened = truncateText(source, 45);
+  assert.ok(shortened.endsWith(" …"));
+  assert.ok(shortened.length <= 47);
 });
 
-test("paginates long recipes by visual line budget", () => {
-  const recipe = {
-    ingredients: Array.from({ length: 18 }, (_, index) => `${index + 1} Portionen einer längeren Zutat mit zusätzlicher Beschreibung`),
-    instructions: Array.from({ length: 8 }, (_, index) => `Arbeitsschritt ${index + 1}: ${"Ausführliche Erklärung mit mehreren Einzelheiten. ".repeat(5)}`)
-  };
-  const pages = paginateRecipeContent(recipe);
-  assert.ok(pages.filter((page) => page.kind === "ingredients").length >= 2);
-  assert.ok(pages.filter((page) => page.kind === "steps").length >= 3);
-  for (const page of pages.filter((item) => item.kind === "steps")) {
-    const cost = page.entries.reduce((sum, entry) => sum + visualLines(entry, 66) + 0.35, 0);
-    assert.ok(cost <= 9.5, `step page exceeds budget: ${cost}`);
-  }
+test("creates exactly one overview and keeps every ingredient", () => {
+  const ingredients = Array.from({ length: 18 }, (_, index) => `${index + 1} Portionen Zutat`);
+  const overview = buildRecipeOverview({ ingredients, instructions: ["Alles vermischen.", "Fertig garen."] });
+  assert.equal(overview.kind, "overview");
+  assert.equal(overview.ingredients.length, ingredients.length);
+  assert.deepEqual(overview.ingredients.map((entry) => entry.text), ingredients);
 });
 
-test("continuations keep the original step sequence visible", () => {
-  const pages = paginateRecipeContent({ ingredients: [], instructions: ["Langer Schritt. ".repeat(40), "Kurzer Schritt."] });
-  const markers = pages.flatMap((page) => page.entries.map((entry) => entry.marker));
-  assert.equal(markers[0], "1.");
-  assert.ok(markers.includes("↳"));
-  assert.ok(markers.includes("2."));
+test("long preparation covers the complete sequence in at most six groups", () => {
+  const instructions = Array.from({ length: 12 }, (_, index) => `Arbeitsschritt ${index + 1} mit einer ausführlichen Erklärung.`);
+  const summary = summarizeInstructions(instructions);
+  assert.equal(summary.entries.length, 6);
+  assert.equal(summary.entries[0].marker, "1–2.");
+  assert.equal(summary.entries.at(-1).marker, "11–12.");
+  assert.equal(summary.shortened, true);
+});
+
+test("selects a tighter ingredient layout only when necessary", () => {
+  assert.equal(ingredientDensity(["1 Ei", "Salz"]), "normal");
+  assert.equal(ingredientDensity(Array.from({ length: 26 }, () => "Eine längere Zutatenangabe")), "tight");
 });

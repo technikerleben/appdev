@@ -1,6 +1,6 @@
 # Küchenblatt für TRMNL
 
-Mobile PWA zum Importieren strukturierter Online-Rezepte und Übertragen einzelner Rezeptseiten an ein TRMNL E-Ink-Display.
+Mobile PWA zum Importieren strukturierter Online-Rezepte und Übertragen einer einseitigen Rezeptübersicht an ein TRMNL E-Ink-Display. Die Zutaten bleiben vollständig; die Zubereitung wird bei Bedarf automatisch gekürzt.
 
 ## Einrichtung in TRMNL
 
@@ -10,7 +10,7 @@ Mobile PWA zum Importieren strukturierter Online-Rezepte und Übertragen einzeln
 4. Das Plugin der aktiven Playlist hinzufügen.
 5. Die erzeugte Webhook-URL kopieren und in der Webapp unter dem Zahnrad eintragen.
 
-Die Webhook-Adresse wird nur im lokalen Browserspeicher abgelegt. Beim Senden leitet die Serverfunktion die jeweils ausgewählte, auf höchstens 2 KB begrenzte Seite an TRMNL weiter.
+Die Webhook-Adresse wird nur im lokalen Browserspeicher abgelegt. Beim Senden leitet die Serverfunktion die einseitige, auf die TRMNL-Darstellung begrenzte Übersicht an TRMNL weiter.
 
 ## Import
 
