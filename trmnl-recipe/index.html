@@ -25,7 +25,7 @@
     <section class="hero">
       <p class="eyebrow">Rezept auf E-Ink</p>
       <h1>Was möchtest du heute kochen?</h1>
-      <p>Füge den Link zu einem Online-Rezept ein. Du kannst Zutaten und Schritte vor dem Senden prüfen.</p>
+      <p>Füge den Link zu einem Online-Rezept ein. Die Zutaten bleiben vollständig sichtbar; die Zubereitung wird passend für eine Seite gekürzt.</p>
       <form id="importForm" class="url-form">
         <label for="recipeUrl">Rezeptlink</label>
         <div class="url-row">
@@ -66,16 +66,11 @@
           <div class="device-screen" id="deviceScreen" aria-live="polite"></div>
           <span class="device-name">TRMNL</span>
         </div>
-        <div class="page-controls">
-          <button class="secondary nav-button" id="previousButton" type="button" aria-label="Vorherige Seite">←</button>
-          <span id="pageLabel">1 / 1</span>
-          <button class="secondary nav-button" id="nextButton" type="button" aria-label="Nächste Seite">→</button>
-        </div>
         <button class="send-button" id="sendButton" type="button">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h14m-5-5 5 5-5 5M20 5v14"/></svg>
-          <span>Diese Seite an TRMNL senden</span>
+          <span>Rezeptübersicht an TRMNL senden</span>
         </button>
-        <p class="send-note">Das Display übernimmt die Seite bei seiner nächsten Aktualisierung.</p>
+        <p class="send-note">Das Display übernimmt die einseitige Übersicht bei seiner nächsten Aktualisierung.</p>
       </div>
     </section>
   </main>
@@ -89,7 +84,7 @@
       <p>Lege in TRMNL ein privates Plugin mit der Strategie <strong>Webhook</strong> an. Kopiere anschließend dessen Webhook-URL hierher.</p>
       <label for="webhookInput">Webhook-URL</label>
       <input id="webhookInput" type="url" autocomplete="off" spellcheck="false" placeholder="https://usetrmnl.com/api/custom_plugins/…">
-      <p class="privacy-note">Die Adresse bleibt in diesem Browser gespeichert und wird nur zum Übertragen einer Displayseite verwendet.</p>
+      <p class="privacy-note">Die Adresse bleibt in diesem Browser gespeichert und wird nur zum Übertragen der Rezeptübersicht verwendet.</p>
       <div class="dialog-actions">
         <button class="secondary" value="cancel" type="submit">Abbrechen</button>
         <button class="primary" id="saveSettingsButton" value="default" type="submit">Speichern</button>
