@@ -116,3 +116,21 @@ code { background: #eee; padding: 2px 5px; border-radius: 4px; }
 .screen-preparation .screen-list { grid-template-columns: 1fr; row-gap: clamp(3px, .7vw, 6px); font-size: clamp(8px, 1.45vw, 12px); line-height: 1.12; }
 .screen-ingredients.density-compact .screen-list { font-size: clamp(7px, 1.25vw, 10px); line-height: 1.02; row-gap: 2px; }
 .screen-ingredients.density-tight .screen-list { font-size: clamp(6px, 1.08vw, 9px); line-height: 1; row-gap: 1px; }
+
+/* Displaynahe Vorschau für das 800 × 480 TRMNL-Layout. */
+.device-screen { padding: 2.2%; }
+.screen-top { border-bottom-width: 3px; padding-bottom: 1.6%; }
+.screen-title { font-family: Arial, Helvetica, sans-serif; font-size: clamp(19px, 4.6vw, 37px); font-weight: 800; line-height: 1.02; letter-spacing: -.02em; -webkit-line-clamp: 1; }
+.screen-meta { display: inline-block; width: auto; margin: 1.4% 0 2%; border: 1.5px solid #111; border-radius: 999px; padding: .8% 1.6%; font: 700 clamp(8px, 1.55vw, 12px)/1 ui-sans-serif, sans-serif; }
+.screen-overview { height: 72%; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 1.8%; align-items: stretch; }
+.screen-column { border: 2px solid #111; border-radius: 7px; padding: 2.1% 2.4%; overflow: hidden; }
+.screen-column .screen-section { display: inline-block; margin: 0 0 3%; border: 0; border-radius: 3px; background: #111; color: #fff; padding: 1.5% 3%; font: 800 clamp(9px, 1.8vw, 15px)/1 ui-sans-serif, sans-serif; letter-spacing: .03em; }
+.screen-ingredients .screen-list { column-gap: 5%; row-gap: clamp(3px, .7vw, 6px); font-size: clamp(9px, 1.9vw, 15px); line-height: 1.12; }
+.screen-ingredients .screen-list li { grid-template-columns: 7px 1fr; gap: 5px; }
+.screen-ingredients .screen-list b { width: 7px; height: 7px; margin-top: 3px; border-radius: 50%; background: #111; color: transparent; overflow: hidden; }
+.screen-preparation .screen-list { row-gap: clamp(3px, .75vw, 7px); font-size: clamp(9px, 1.8vw, 14px); line-height: 1.14; }
+.screen-preparation .screen-list li { grid-template-columns: 22px 1fr; gap: 6px; }
+.screen-preparation .screen-list b { width: 22px; height: 22px; display: grid; place-items: center; border: 1.5px solid #111; border-radius: 50%; font-size: clamp(7px, 1.2vw, 10px); line-height: 1; }
+.screen-ingredients.density-compact .screen-list { font-size: clamp(8px, 1.6vw, 13px); line-height: 1.06; row-gap: 3px; }
+.screen-ingredients.density-tight .screen-list { font-size: clamp(7px, 1.35vw, 11px); line-height: 1.02; row-gap: 1px; }
+.screen-source { bottom: 1.2%; right: 2.2%; font-weight: 700; }
