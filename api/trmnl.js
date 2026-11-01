@@ -20,19 +20,22 @@ function cleanString(value, max) {
   return String(value || "").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, max);
 }
 
+function cleanEntries(entries, maxText) {
+  return Array.isArray(entries) ? entries.map((entry) => ({
+    marker: cleanString(entry?.marker, 7),
+    text: cleanString(entry?.text, maxText)
+  })).filter((entry) => entry.text) : [];
+}
+
 function compactPage(page) {
-  const entries = Array.isArray(page.entries) ? page.entries.slice(0, 12).map((entry) => ({
-    marker: cleanString(entry?.marker, 5),
-    text: cleanString(entry?.text, 240)
-  })) : [];
   return {
     title: cleanString(page.title, 90),
     meta: cleanString(page.meta, 100),
-    section: cleanString(page.section, 36),
-    page: Number(page.page) || 1,
-    pages: Number(page.pages) || 1,
-    kind: page.kind === "steps" ? "steps" : "ingredients",
-    entries,
+    kind: "overview",
+    ingredients: cleanEntries(page.ingredients, 160),
+    preparation: cleanEntries(page.preparation, 130).slice(0, 6),
+    preparation_shortened: Boolean(page.preparationShortened),
+    ingredient_density: ["normal", "compact", "tight"].includes(page.ingredientDensity) ? page.ingredientDensity : "normal",
     source: cleanString(page.source, 55),
     revision: Date.now()
   };
@@ -45,7 +48,7 @@ module.exports = async function handler(req, res) {
     const webhook = validateWebhook(body?.webhook);
     const mergeVariables = compactPage(body?.page || {});
     const payload = JSON.stringify({ merge_variables: mergeVariables });
-    if (Buffer.byteLength(payload) > 2000) throw new Error("Diese Seite überschreitet das TRMNL-Limit von 2 KB.");
+    if (Buffer.byteLength(payload) > 4800) throw new Error("Die Zutatenliste ist für eine einzelne TRMNL-Seite ungewöhnlich lang. Kürze bitte nur ergänzende Hinweise in den Zutatenangaben.");
     const response = await fetch(webhook, {
       method: "POST",
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
