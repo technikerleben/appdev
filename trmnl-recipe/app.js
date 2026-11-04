@@ -5,7 +5,7 @@ const STORAGE = { webhook: "kuechenblatt.webhook", recent: "kuechenblatt.recent"
 const state = { recipe: null, overview: null };
 
 const elements = {
-  importForm: $("#importForm"), recipeUrl: $("#recipeUrl"), importButton: $("#importButton"), message: $("#message"),
+  importForm: $("#importForm"), recipeUrl: $("#recipeUrl"), importButton: $("#importButton"), manualRecipeButton: $("#manualRecipeButton"), message: $("#message"),
   workspace: $("#workspace"), workspaceTitle: $("#workspaceTitle"), editor: $("#editor"), editToggle: $("#editToggleButton"),
   title: $("#titleInput"), yield: $("#yieldInput"), time: $("#timeInput"), ingredients: $("#ingredientsInput"), instructions: $("#instructionsInput"),
   display: $("#deviceScreen"), send: $("#sendButton"),
@@ -179,6 +179,25 @@ async function sendOverview() {
   finally { elements.send.disabled = false; elements.send.querySelector("span").textContent = original; }
 }
 
+function startManualRecipe() {
+  const recipe = {
+    title: "Eigenes Rezept",
+    yield: "",
+    totalTime: "",
+    ingredients: [],
+    instructions: [],
+    sourceName: "Eigenes Rezept",
+    sourceUrl: `manual:${Date.now()}`
+  };
+  setRecipe(recipe, false);
+  elements.editor.hidden = false;
+  elements.editToggle.textContent = "Bearbeitung schließen";
+  elements.title.focus();
+  elements.title.select();
+  showMessage("Gib Titel, Zutaten und Zubereitung ein. Speichere anschließend deine Eingaben.", "success");
+}
+
+elements.manualRecipeButton.addEventListener("click", startManualRecipe);
 elements.importForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const url = elements.recipeUrl.value.trim();

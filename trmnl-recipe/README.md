@@ -1,6 +1,6 @@
 # Küchenblatt für TRMNL
 
-Mobile PWA zum Importieren strukturierter Online-Rezepte und Übertragen einer einseitigen Rezeptübersicht an ein TRMNL E-Ink-Display. Die Zutaten bleiben vollständig; die Zubereitung wird bei Bedarf automatisch gekürzt.
+Mobile PWA zum Importieren strukturierter Online-Rezepte oder direkten Eingeben eigener Rezepte und Übertragen einer einseitigen Rezeptübersicht an ein TRMNL E-Ink-Display. Die Zutaten bleiben vollständig; die Zubereitung wird bei Bedarf automatisch gekürzt.
 
 ## Einrichtung in TRMNL
 
@@ -12,9 +12,11 @@ Mobile PWA zum Importieren strukturierter Online-Rezepte und Übertragen einer e
 
 Die Webhook-Adresse wird nur im lokalen Browserspeicher abgelegt. Beim Senden leitet die Serverfunktion die einseitige, auf die TRMNL-Darstellung begrenzte Übersicht an TRMNL weiter.
 
-## Import
+## Rezepte erfassen
 
-Der Import nutzt strukturierte Daten vom Typ `Recipe` (`application/ld+json`). Viele große Rezeptseiten liefern dieses Format direkt mit. Seiten ohne maschinenlesbare Rezeptdaten oder mit aktivem Zugriffsschutz können nicht automatisch importiert werden.
+Online-Rezepte werden über den Rezeptlink importiert. Über **Eigenes Rezept eingeben** öffnet sich derselbe Editor direkt für Titel, Portionen, Zeit, Zutaten und Zubereitung. Eigene Rezepte werden nach dem Speichern ebenfalls lokal unter den zuletzt verwendeten Rezepten abgelegt.
+
+Der automatische Import nutzt strukturierte Daten vom Typ `Recipe` (`application/ld+json`). Viele große Rezeptseiten liefern dieses Format direkt mit. Seiten ohne maschinenlesbare Rezeptdaten oder mit aktivem Zugriffsschutz können nicht automatisch importiert werden.
 
 ## Lokale Entwicklung
 
