@@ -134,3 +134,14 @@ code { background: #eee; padding: 2px 5px; border-radius: 4px; }
 .screen-ingredients.density-compact .screen-list { font-size: clamp(8px, 1.6vw, 13px); line-height: 1.06; row-gap: 3px; }
 .screen-ingredients.density-tight .screen-list { font-size: clamp(7px, 1.35vw, 11px); line-height: 1.02; row-gap: 1px; }
 .screen-source { bottom: 1.2%; right: 2.2%; font-weight: 700; }
+
+
+/* Direkte Rezepteingabe und größere, displaynahe Typografie. */
+.manual-separator { display: flex; align-items: center; gap: 12px; margin: 18px 0 12px; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.manual-separator::before, .manual-separator::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.manual-button { width: 100%; }
+.screen-column .screen-section { font-size: clamp(11px, 2.15vw, 18px); }
+.screen-ingredients .screen-list { font-size: clamp(11px, 2.25vw, 18px); line-height: 1.14; }
+.screen-preparation .screen-list { font-size: clamp(10px, 2.1vw, 17px); line-height: 1.16; }
+.screen-ingredients.density-compact .screen-list { font-size: clamp(9px, 1.85vw, 15px); line-height: 1.08; }
+.screen-ingredients.density-tight .screen-list { font-size: clamp(8px, 1.6vw, 13px); line-height: 1.04; }
