@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#243a45">
+  <meta name="description" content="Dein Einrichtungsassistent für Offline-Wissen, Karten und private Krisenvorsorge nach BBK-Empfehlungen.">
+  <title>Wissensspeicher · Dein Offline-Notfallhelfer</title>
+  <style>
+    :root{color-scheme:light;--ink:#21333e;--muted:#5d6d74;--line:#d8e1de;--surface:#fff;--page:#f4f6f3;--sage:#5f8675;--sage-light:#e7efea;--rust:#b96b48;--rust-light:#f7eae2;--slate:#263f4b;--shadow:0 10px 30px rgba(27,55,52,.055);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-synthesis:none}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--page);color:var(--ink);line-height:1.52}button,input,select{font:inherit}button{cursor:pointer}a{color:#255f66;text-underline-offset:3px}a:hover{color:#174047}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #b96b48;outline-offset:3px}
+    .shell{width:min(1100px,calc(100% - 32px));margin-inline:auto}
+    header{background:var(--slate);color:#fff;padding:28px 0 22px}
+    .topline{font-size:.77rem;text-transform:uppercase;letter-spacing:.15em;color:#b1d7c7;font-weight:750}
+    .headrow{display:flex;justify-content:space-between;align-items:start;gap:20px}
+    h1{font-size:clamp(1.85rem,4.5vw,3.1rem);letter-spacing:-.045em;line-height:1.1;margin:.36rem 0 .6rem}h2{font-size:clamp(1.5rem,3vw,2.05rem);line-height:1.18;letter-spacing:-.03em;margin:0 0 7px}h3{font-size:1.06rem;margin:0 0 8px;line-height:1.35}p{margin:0 0 12px}
+    .intro{max-width:730px;color:#d5e0df;font-size:1rem;margin:0}.edition{font-size:.8rem;color:#bdd3cc;white-space:nowrap;border:1px solid #5d7779;border-radius:40px;padding:7px 12px}
+    nav{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}.tabs{display:flex;gap:3px;overflow-x:auto;scrollbar-width:thin;padding-block:5px}.tab{border:0;border-bottom:3px solid transparent;color:#4c5d63;background:transparent;padding:13px 14px;white-space:nowrap;font-weight:700;font-size:.92rem}.tab[aria-selected="true"]{border-color:var(--sage);color:var(--slate);background:var(--sage-light);border-radius:9px 9px 0 0}
+    main{padding:24px 0 55px}.panel[hidden]{display:none!important}.section-head{display:flex;justify-content:space-between;gap:12px;align-items:start;margin-bottom:22px}.eyebrow{display:block;font-size:.75rem;font-weight:800;color:var(--rust);letter-spacing:.13em;text-transform:uppercase;margin-bottom:7px}.subtle{color:var(--muted)}.small{font-size:.84rem}.tiny{font-size:.75rem}
+    .card{background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:16px;padding:20px}.card+.card{margin-top:15px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.grid.thirds{grid-template-columns:repeat(3,minmax(0,1fr))}.span-all{grid-column:1/-1}
+    .metric{font-size:clamp(1.75rem,3.5vw,2.45rem);font-weight:790;letter-spacing:-.055em;line-height:1.16;color:var(--slate)}.metric-label{font-size:.83rem;color:var(--muted);font-weight:650;margin-bottom:6px}
+    .progress-track{height:11px;border-radius:20px;background:#e5ece7;overflow:hidden;margin:11px 0 9px}.progress-fill{height:100%;border-radius:20px;background:var(--sage);width:0;transition:width .2s}
+    .callout{padding:17px 19px;border:1px solid #b8cfc1;border-left:4px solid var(--sage);background:#eef5ee;border-radius:12px}.callout.warn{border-color:#e5cdbd;border-left-color:var(--rust);background:#fcf5f0}
+    .btn{border:1px solid var(--line);border-radius:10px;padding:9px 13px;background:#fff;color:var(--slate);font-weight:750;font-size:.9rem;display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;min-height:41px}.btn:hover{background:#f4f8f5}.btn.primary{background:var(--slate);border-color:var(--slate);color:#fff}.btn.primary:hover{background:#345362}.btn.sage{background:var(--sage-light);border-color:#c8dcd1}.btn.danger{color:#944a35;border-color:#e9c7b6}.btn.smallbtn{padding:7px 10px;min-height:36px;font-size:.82rem}.buttonrow{display:flex;flex-wrap:wrap;gap:8px}.pill{display:inline-flex;align-items:center;font-weight:750;font-size:.72rem;padding:4px 9px;border-radius:20px;background:#eef2f0;color:#53676c}.pill.sage{background:var(--sage-light);color:#3b6650}.pill.rust{background:var(--rust-light);color:#914f31}
+    .resource{display:flex;flex-direction:column;gap:12px}.resource-top{display:flex;justify-content:space-between;align-items:start;gap:12px}.resource-description{color:var(--muted);font-size:.9rem}.resource-note{font-size:.79rem;color:#6b5f50;background:#f9f5ef;border-radius:8px;padding:9px 11px}.resource-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:auto}.resource-status{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px;color:var(--ink);font-size:.85rem;font-weight:650;max-width:185px}
+    .filterbar{display:grid;grid-template-columns:1fr 210px 190px;gap:10px;margin-bottom:16px}.field{display:flex;flex-direction:column;gap:5px}.field label{font-size:.82rem;color:var(--muted);font-weight:750}.field input,.field select{width:100%;border:1px solid #cbd8d4;background:white;color:var(--ink);border-radius:10px;min-height:43px;padding:9px 11px}
+    .checkrow{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid #e8eeeb}.checkrow:last-child{border-bottom:0}.checkrow input[type="checkbox"]{margin:3px 0 0;flex-shrink:0;width:19px;height:19px;accent-color:#4f7968}.checkrow label{cursor:pointer;flex:1}.checkrow .help{display:block;color:var(--muted);font-size:.8rem;margin-top:2px}.checkrow.checked label>strong{text-decoration:line-through;text-decoration-color:#a0b2a7;color:#668073}
+    .split{display:grid;grid-template-columns:1.18fr .82fr;gap:16px}.stock-number{font-size:2rem;font-weight:800;line-height:1.1;letter-spacing:-.045em}.stock-row{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:10px 0;border-bottom:1px solid var(--line)}.stock-row:last-child{border-bottom:0}.stock-row strong{font-variant-numeric:tabular-nums}.stock-row span{color:var(--muted);font-size:.87rem}
+    .tip-list{margin:0;padding-left:21px}.tip-list li{margin:0 0 9px}.steps{counter-reset:step;list-style:none;padding:0;margin:0}.steps li{counter-increment:step;position:relative;padding:0 0 19px 42px;border-left:2px solid #d3dfd6;margin-left:14px}.steps li:before{content:counter(step);position:absolute;left:-15px;top:0;display:grid;place-items:center;background:var(--slate);color:white;width:28px;height:28px;border-radius:50%;font-size:.8rem;font-weight:800}.steps li:last-child{border-color:transparent}.steps strong{display:block}.steps span{display:block;font-size:.87rem;color:var(--muted);margin-top:4px}
+    .empty{border:1px dashed #bccbc4;border-radius:13px;padding:23px;background:#fff;text-align:center;color:var(--muted)}.listinline{display:flex;flex-wrap:wrap;gap:6px}.source{font-size:.78rem;color:var(--muted)}.footnote{border-top:1px solid var(--line);margin-top:30px;padding-top:20px;color:var(--muted);font-size:.81rem}
+    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--slate);color:white;padding:12px 18px;border-radius:10px;box-shadow:0 14px 35px #243a4540;z-index:50;max-width:calc(100% - 36px);font-size:.9rem}
+    .notice{display:flex;gap:11px;align-items:start}.notice .dot{width:10px;height:10px;flex:0 0 10px;border-radius:50%;background:var(--rust);margin-top:7px}
+    hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+    @media(max-width:820px){.grid.thirds{grid-template-columns:repeat(2,minmax(0,1fr))}.split{grid-template-columns:1fr}.filterbar{grid-template-columns:1fr 1fr}.filterbar .field:first-child{grid-column:1/-1}}
+    @media(max-width:560px){.shell{width:min(100% - 24px,1100px)}header{padding:23px 0}.headrow{display:block}.edition{display:inline-flex;margin-top:16px}main{padding-top:18px}.grid,.grid.thirds{grid-template-columns:1fr}.card{padding:16px}.tab{font-size:.84rem;padding:11px 10px}.section-head{display:block}.section-head .buttonrow{margin-top:12px}.filterbar{grid-template-columns:1fr}.filterbar .field:first-child{grid-column:auto}.resource-top{display:block}.resource-top .pill{margin-top:7px}.stock-number{font-size:1.75rem}}
+    @media print{nav,header,.buttonrow,.btn,.resource-status,.filterbar,.no-print{display:none!important}body{background:#fff}.panel[hidden]{display:none!important}.card{break-inside:avoid;box-shadow:none}.shell{width:100%}main{padding:0}.section-head{margin-bottom:12px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <header>
+    <div class="shell headrow">
+      <div>
+        <div class="topline">Dein digitaler Vorsorge- und Wissensplaner</div>
+        <h1>Wissensspeicher<span style="color:#a4cfba">.</span></h1>
+        <p class="intro">Baue dir Schritt für Schritt einen verlässlichen Offline-Helfer auf: Karten, Handbücher, Reparaturwissen und praktische Krisenvorsorge.</p>
+      </div>
+      <div class="edition">Online-Assistent · Version 1.0</div>
+    </div>
+  </header>
+  <nav aria-label="Hauptnavigation"><div class="shell tabs" role="tablist" aria-label="Bereiche">
+    <button class="tab" type="button" role="tab" aria-selected="true" aria-controls="panel-start" data-tab="start">Übersicht</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-katalog" data-tab="katalog">Wissensbibliothek</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-vorrat" data-tab="vorrat">BBK-Vorsorge</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-test" data-tab="test">Offline-Test</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-daten" data-tab="daten">Meine Daten</button>
+  </div></nav>
+  <main class="shell">
+    <section class="panel" id="panel-start" role="tabpanel">
+      <div class="section-head"><div><span class="eyebrow">Dein Projekt</span><h2>Ein verlässliches Notfallwissen aufbauen</h2><p class="subtle">Eine klare Reihenfolge statt einer unübersichtlichen Sammlung.</p></div></div>
+      <div class="grid thirds">
+        <div class="card"><div class="metric-label">Einrichtung & Prüfungen</div><div class="metric" id="stat-steps">0 / 0</div><div class="progress-track" role="progressbar" aria-label="Einrichtungsfortschritt" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="bar-steps"><div class="progress-fill" id="fill-steps"></div></div><div class="small subtle" id="stat-steps-pct">0 % erledigt</div></div>
+        <div class="card"><div class="metric-label">Wissensquellen gesichert</div><div class="metric" id="stat-resources">0</div><p class="small subtle">Markiert als heruntergeladen oder eingerichtet</p></div>
+        <div class="card"><div class="metric-label">Offline wirklich getestet</div><div class="metric" id="stat-offline">0</div><p class="small subtle">Eine manuelle Prüfung im Flugmodus zählt.</p></div>
+      </div>
+      <div class="grid" style="margin-top:16px">
+        <div class="card">
+          <h3>Dein Weg in fünf Schritten</h3>
+          <ol class="steps">
+            <li><strong>Grundlage schaffen</strong><span>Reader installieren und einen gut auffindbaren Speicherort für PDF/EPUB anlegen.</span></li>
+            <li><strong>Karten herunterladen</strong><span>Organic Maps oder OsmAnd installieren, NRW und wichtige Zielregionen laden.</span></li>
+            <li><strong>Wissen sichern</strong><span>Kiwix einrichten, Reparaturwissen und ausgewählte Wissensarchive laden.</span></li>
+            <li><strong>Handbücher ergänzen</strong><span>BBK-Ratgeber, Erste Hilfe, Orientierung und wichtige persönliche Anleitungen.</span></li>
+            <li><strong>Ohne Netz testen und sichern</strong><span>Flugmodus aktivieren, Inhalte prüfen, Daten auf ein zweites Medium sichern.</span></li>
+          </ol>
+          <div class="buttonrow"><button class="btn primary" data-go="katalog" type="button">Zur Download-Bibliothek</button><button class="btn" data-go="test" type="button">Einrichtungs-Checkliste</button></div>
+        </div>
+        <div class="card">
+          <h3>Die nächsten offenen Aufgaben</h3><div id="next-tasks"></div>
+          <hr><div class="callout warn notice"><span class="dot" aria-hidden="true"></span><div><strong>Wichtige Abgrenzung</strong><p class="small" style="margin:5px 0 0">Diese Web-App verwaltet nur deinen Plan. Sie speichert keine fremden PDFs oder Karten automatisch offline. Der Fortschritt liegt lokal in diesem Browser, nicht in GitHub oder der Cloud.</p></div></div>
+        </div>
+      </div>
+    </section>
+    <section class="panel" id="panel-katalog" role="tabpanel" hidden>
+      <div class="section-head"><div><span class="eyebrow">Kuratierte Quellen</span><h2>Deine Wissensbibliothek</h2><p class="subtle">Direkte Originalquellen und passende Offline-Apps. Links öffnen sich online; lade die Inhalte bewusst auf dein Handy.</p></div><div class="buttonrow"><span class="pill" id="catalog-counter">0 Quellen</span></div></div>
+      <div class="callout" style="margin-bottom:16px"><strong>So funktionieren die Statusmarkierungen:</strong> <span class="small">„Heruntergeladen / eingerichtet“ bedeutet, dass du den Download selbst abgeschlossen hast. „Offline geprüft“ setzt voraus, dass du die Datei oder App im Flugmodus wirklich geöffnet hast. Die Markierung allein ist kein Nachweis.</span></div>
+      <div class="filterbar">
+        <div class="field"><label for="search">Bibliothek durchsuchen</label><input id="search" type="search" placeholder="z. B. Stromausfall, Fahrrad, Medizin"></div>
+        <div class="field"><label for="filter-category">Thema</label><select id="filter-category"><option value="all">Alle Themen</option><option value="app">Offline-Apps</option><option value="karte">Karten & Orientierung</option><option value="wissen">Wissensarchive</option><option value="bbk">BBK & Vorsorge</option><option value="medizin">Erste Hilfe & Gesundheit</option><option value="reparatur">Reparaturen</option></select></div>
+        <div class="field"><label for="filter-status">Stand</label><select id="filter-status"><option value="all">Alle Status</option><option value="0">Noch offen</option><option value="1">Heruntergeladen</option><option value="2">Offline geprüft</option></select></div>
+      </div>
+      <div class="grid" id="resources"></div>
+      <p class="footnote">Größenangaben sind Richtwerte und können sich ändern. Ein externer Link ist nicht zwingend ein direkter Dateidownload. Für Kiwix-Dateien bitte die Archive innerhalb von Kiwix oder in der offiziellen Kiwix-Bibliothek auswählen.</p>
+    </section>
+    <section class="panel" id="panel-vorrat" role="tabpanel" hidden>
+      <div class="section-head"><div><span class="eyebrow">Nach Empfehlungen des BBK</span><h2>Bevorratung & Krisenvorsorge</h2><p class="subtle">Erst drei Tage absichern, dann schrittweise auf zehn Tage ausbauen. Passe den Plan an deinen Haushalt an.</p></div><div class="buttonrow"><button class="btn" id="print-stock" type="button">Drucken</button></div></div>
+      <div class="split">
+        <div class="card">
+          <h3>Wasserbedarf berechnen</h3>
+          <p class="small subtle">BBK-Planungswert: 2 Liter Getränke bzw. Wasser pro Person und Tag, einschließlich eines Anteils zum Kochen.</p>
+          <div class="grid" style="margin:13px 0 20px">
+            <div class="field"><label for="people">Personen im Haushalt</label><input id="people" type="number" min="1" max="30" step="1" value="4" inputmode="numeric"></div>
+            <div class="field"><label for="days">Zielzeitraum</label><select id="days"><option value="3">3 Tage (Start)</option><option value="5">5 Tage</option><option value="7">7 Tage</option><option value="10">10 Tage (Ziel)</option></select></div>
+            <div class="field span-all"><label for="have-water">Bereits bevorratete Liter Getränke/Wasser</label><input id="have-water" type="number" min="0" max="99999" step="0.5" value="0" inputmode="decimal"></div>
+          </div>
+          <div class="grid">
+            <div style="background:#eff5f0;border-radius:12px;padding:16px"><div class="metric-label">Gesamtbedarf</div><div class="stock-number" id="need-water">24 l</div></div>
+            <div style="background:#fcf3ed;border-radius:12px;padding:16px"><div class="metric-label">Noch einzuplanen</div><div class="stock-number" id="missing-water">24 l</div></div>
+          </div>
+          <div class="progress-track" id="bar-water" role="progressbar" aria-label="Wasservorrat" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="fill-water"></div></div>
+          <p class="small subtle" id="water-caption">0 % des Zielbedarfs vorhanden</p>
+          <div class="callout warn small">Nicht eingerechnet sind zusätzlicher Wasserbedarf für Hygiene, besondere gesundheitliche Bedürfnisse, Hitze oder Haustiere. Den Bedarf individuell erhöhen. „2 Liter“ ist keine universelle Versorgungsgarantie.</div>
+        </div>
+        <div class="card">
+          <h3>Lebensmittel clever bevorraten</h3>
+          <ul class="tip-list small">
+            <li><strong>Lebender Vorrat:</strong> Produkte regelmäßig essen und beim nächsten Einkauf ersetzen.</li>
+            <li><strong>Haltbar:</strong> Möglichst Lebensmittel ohne Kühlpflicht wählen.</li>
+            <li><strong>Ohne Herd:</strong> Einen Teil direkt verzehrfertig lagern.</li>
+            <li><strong>Wenig Energie:</strong> Bei Kochprodukten kurze Garzeiten bevorzugen.</li>
+            <li><strong>Individuell:</strong> Allergien, Kinder, Medikamente, Tiere und Vorlieben berücksichtigen.</li>
+          </ul>
+          <p class="source">Quelle: <a href="https://www.bbk.bund.de/DE/Warnung-Vorsorge/Vorsorge/So-koennen-Sie-sich-vorbereiten/Bevorraten/bevorraten_node.html" target="_blank" rel="noopener noreferrer">BBK · Essen und Trinken bevorraten</a></p>
+        </div>
+      </div>
+      <div class="grid" style="margin-top:16px">
+        <div class="card"><h3>Vorräte & Haushalt</h3><p class="small subtle">Hake die Punkte erst ab, wenn sie wirklich vorhanden oder organisiert sind.</p><div id="stock-checks"></div></div>
+        <div class="card"><h3>Notfallvorsorge zu Hause</h3><p class="small subtle">Angelehnt an BBK-Checklisten; für jede Wohnsituation individuell prüfen.</p><div id="prep-checks"></div></div>
+      </div>
+      <div class="callout warn" style="margin-top:17px"><strong>Sicherheit bei Stromausfall:</strong> Holzkohlegrills, Campingkocher und andere nicht ausdrücklich für Innenräume zugelassene Geräte niemals drinnen benutzen. Gefahr durch Kohlenmonoxid, Feuer und Sauerstoffmangel. Auch Heizgeräte nur nach Herstellerfreigabe und mit sicheren Lüftungsbedingungen verwenden.</div>
+      <div class="footnote">Offizielle Grundlagen: <a href="https://www.bbk.bund.de/DE/Warnung-Vorsorge/Vorsorge/Ratgeber-Checkliste/ratgeber-checkliste_node.html" target="_blank" rel="noopener noreferrer">BBK-Ratgeber</a> · <a href="https://www.bbk.bund.de/DE/Warnung-Vorsorge/Vorsorge/Ratgeber-Checkliste/Kompakt-Checklisten/kompakt-checklisten.html" target="_blank" rel="noopener noreferrer">BBK-Kompaktchecklisten</a>. Diese App stellt eine eigene Arbeitshilfe dar und ist keine offizielle BBK-Anwendung.</div>
+    </section>
+    <section class="panel" id="panel-test" role="tabpanel" hidden>
+      <div class="section-head"><div><span class="eyebrow">Kontrolle</span><h2>Ohne Internet einsatzfähig?</h2><p class="subtle">Ein Download ist erst dann wirklich nützlich, wenn du ihn ohne Netz wiederfindest und öffnen kannst.</p></div></div>
+      <div class="grid">
+        <div class="card"><h3>Einrichtungsschritte</h3><div id="setup-checks"></div></div>
+        <div class="card"><h3>Der Flugmodus-Test</h3><p class="small subtle">Flugmodus aktivieren; WLAN und Mobilfunk wirklich auslassen. Standort/GPS funktioniert bei Satellitenempfang weiterhin.</p><div id="offline-checks"></div><p class="source" id="last-tested"></p></div>
+      </div>
+      <div class="callout" style="margin-top:16px"><strong>Wichtig:</strong> Aktuelle Warnungen (z. B. NINA), Notrufe sowie aktuelle Wetter- und Verkehrsdaten benötigen eine funktionierende Verbindung. Die Offline-Bibliothek ersetzt weder Stromversorgung noch Telefonnetz. Eine Powerbank, ausgedruckte Kontakte und ein unabhängiges Radio gehören dazu.</div>
+    </section>
+    <section class="panel" id="panel-daten" role="tabpanel" hidden>
+      <div class="section-head"><div><span class="eyebrow">Privat & lokal</span><h2>Eigene Quellen und Datensicherung</h2><p class="subtle">Dein Bearbeitungsstand wird auf diesem Gerät im Browser gespeichert. Für einen Gerätewechsel exportiere eine Sicherungsdatei.</p></div></div>
+      <div class="grid">
+        <div class="card">
+          <h3>Eigene Ressource hinzufügen</h3>
+          <form id="custom-form">
+            <div class="field" style="margin:12px 0"><label for="custom-title">Titel *</label><input required maxlength="100" id="custom-title" placeholder="z. B. Handbuch meines Fahrrads"></div>
+            <div class="field" style="margin:12px 0"><label for="custom-url">Link (optional, https://)</label><input id="custom-url" maxlength="1000" type="url" placeholder="https://…"></div>
+            <div class="field" style="margin:12px 0"><label for="custom-note">Notiz (optional)</label><input id="custom-note" maxlength="240" placeholder="Was sollte ich damit machen?"></div>
+            <button class="btn primary" type="submit">In Bibliothek aufnehmen</button>
+          </form>
+        </div>
+        <div class="card">
+          <h3>Backup des Bearbeitungsstands</h3>
+          <p class="small subtle">Sichert Status, Häkchen, Wasserkalkulation und eigene Quellen als JSON. Heruntergeladene PDF-, Karten- oder ZIM-Dateien sind <strong>nicht</strong> enthalten.</p>
+          <div class="buttonrow"><button class="btn primary" id="export" type="button">JSON exportieren</button><label class="btn" for="import">JSON importieren</label><input id="import" type="file" accept=".json,application/json" hidden></div>
+          <hr>
+          <p class="small subtle">Auch ohne Import bleiben deine Änderungen nur in diesem Browserprofil gespeichert. Löschst du Browserdaten, kann der Fortschritt verschwinden.</p>
+          <button class="btn danger" id="reset" type="button">Planungsdaten zurücksetzen</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><h3>Meine eigenen Einträge</h3><span class="pill" id="custom-counter">0 Einträge</span></div><div id="custom-list"></div></div>
+      <div class="footnote">Datenschutz: Kein Nutzerkonto, keine Analyse-Dienste, keine automatische Übertragung deiner Eingaben an einen Server. Beim Öffnen der verlinkten Drittangebote gelten deren jeweilige Datenschutzregeln. Bitte keine Passwörter, Ausweisnummern oder Gesundheitsdaten in ungeschützte Notizen oder exportierte JSON-Dateien schreiben.</div>
+    </section>
+  </main>
+  <footer class="shell" style="padding:0 0 30px;color:var(--muted);font-size:.78rem"><span>Wissensspeicher v1.0 · Quellen und Links geprüft: November 2026 · Für private Vorsorge · Keine amtliche Warn- oder Medizin-App</span></footer>
+  <div class="toast" role="status" aria-live="polite" id="toast" hidden></div>
+  <noscript><p class="shell">Bitte JavaScript aktivieren, um Fortschritt, Filter und Checklisten zu nutzen.</p></noscript>
+</body>
+</html>
