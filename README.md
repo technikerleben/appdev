@@ -50,3 +50,16 @@ Die Webapp umfasst:
 - installierbare PWA mit offline verfügbarem Bedienfeld
 
 Deployment und TRMNL-Einrichtung sind in [`trmnl-recipe/README.md`](trmnl-recipe/README.md) beschrieben.
+
+
+## Wissensspeicher für Offline-Notfallwissen
+
+Im Unterordner [`notfallwissen`](notfallwissen/) liegt eine mobiloptimierte, clientseitige HTML-App zum Aufbau einer Offline-Notfallbibliothek. Die Dateien `index.html` und `app.js` funktionieren ohne Framework oder Build-Schritt.
+
+- Kuratierte Quellen: Offline-Karten, Kiwix, Reparaturwissen, BBK-PDFs und Erste Hilfe
+- BBK-orientierter Wasservorratsrechner (2 Liter pro Person und Tag; 3 bis 10 Tage)
+- Interaktive Haushalts-, Einrichtungs- und Offline-Test-Checklisten
+- Eigene Quellen, Status der Downloads sowie JSON-Import und -Export
+- Daten ausschließlich im lokalen Browser-Storage (keine automatische Synchronisierung)
+
+Bei einem Vercel-Deployment des Repository-Roots ist der Bereich über `/notfallwissen/` erreichbar; alternativ kann `notfallwissen/` als eigene statische Website veröffentlicht werden. Die App ist zunächst **online**; verlinkte Handbücher, ZIM-Archive und OSM-Karten werden nicht automatisch heruntergeladen. Es gibt bewusst keinen Service Worker.
