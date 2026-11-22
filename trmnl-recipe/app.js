@@ -90,7 +90,7 @@ function renderScreen() {
   ingredients.className = `screen-column screen-ingredients density-${page.ingredientDensity}`;
   ingredients.append(textElement("div", "screen-section", "Zutaten"), entryList("screen-list", page.ingredients));
   const preparation = document.createElement("section");
-  preparation.className = "screen-column screen-preparation";
+  preparation.className = `screen-column screen-preparation density-${page.preparationDensity || "normal"}`;
   preparation.append(
     textElement("div", "screen-section", page.preparationShortened ? "Zubereitung · kurz" : "Zubereitung"),
     entryList("screen-list steps", page.preparation)
