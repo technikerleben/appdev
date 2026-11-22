@@ -39,5 +39,5 @@ test("limits preparation entries so complete lines fit the wider column", () => 
   const summary = summarizeInstructions(instructions);
   assert.equal(summary.entries.length, 6);
   assert.ok(summary.entries.every((entry) => entry.text.length <= 92));
-  assert.ok(["normal", "compact", "tight"].includes(preparationDensity(summary.entries)));
+  assert.equal(preparationDensity(summary.entries), "tight");
 });
