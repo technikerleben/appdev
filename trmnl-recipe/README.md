@@ -1,6 +1,6 @@
 # Küchenblatt für TRMNL
 
-Mobile PWA zum Importieren strukturierter Online-Rezepte oder direkten Eingeben eigener Rezepte und Übertragen einer einseitigen Rezeptübersicht an ein TRMNL E-Ink-Display. Die Zutaten bleiben vollständig; die Zubereitung wird bei Bedarf automatisch gekürzt.
+Mobile PWA zum Importieren strukturierter Online-Rezepte oder direkten Eingeben eigener Rezepte und Übertragen einer einseitigen Rezeptübersicht an ein TRMNL E-Ink-Display. Die Zutaten bleiben vollständig; die Zubereitung wird bei Bedarf automatisch gekürzt. Das Display nutzt zwei Fünftel für die Zutaten und drei Fünftel für die Zubereitung.
 
 ## Einrichtung in TRMNL
 

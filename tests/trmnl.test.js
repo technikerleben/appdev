@@ -17,9 +17,10 @@ test("rejects arbitrary webhook targets", () => {
 test("keeps all ingredients and compacts preparation", () => {
   const ingredients = Array.from({ length: 22 }, (_, index) => ({ marker: "•", text: `Zutat ${index + 1}` }));
   const preparation = Array.from({ length: 9 }, (_, index) => ({ marker: `${index + 1}.`, text: "Schritt" }));
-  const page = compactPage({ title: "A".repeat(120), ingredients, preparation, ingredientDensity: "tight" });
+  const page = compactPage({ title: "A".repeat(120), ingredients, preparation, ingredientDensity: "tight", preparationDensity: "compact" });
   assert.equal(page.title.length, 90);
   assert.equal(page.ingredients.length, 22);
   assert.equal(page.preparation.length, 6);
   assert.equal(page.ingredient_density, "tight");
+  assert.equal(page.preparation_density, "compact");
 });

@@ -36,6 +36,7 @@ function compactPage(page) {
     preparation: cleanEntries(page.preparation, 130).slice(0, 6),
     preparation_shortened: Boolean(page.preparationShortened),
     ingredient_density: ["normal", "compact", "tight"].includes(page.ingredientDensity) ? page.ingredientDensity : "normal",
+    preparation_density: ["normal", "compact", "tight"].includes(page.preparationDensity) ? page.preparationDensity : "normal",
     source: cleanString(page.source, 55),
     revision: Date.now()
   };
