@@ -2,7 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { buildRecipeOverview, ingredientDensity, summarizeInstructions, truncateText } = require("../trmnl-recipe/pagination");
+const { buildRecipeOverview, ingredientDensity, preparationDensity, summarizeInstructions, truncateText } = require("../trmnl-recipe/pagination");
 
 test("shortens text at a readable boundary", () => {
   const source = "Eine sehr lange Erklärung mit mehreren wichtigen Angaben und einem sinnvollen Ende.";
@@ -31,4 +31,13 @@ test("long preparation covers the complete sequence in at most six groups", () =
 test("selects a tighter ingredient layout only when necessary", () => {
   assert.equal(ingredientDensity(["1 Ei", "Salz"]), "normal");
   assert.equal(ingredientDensity(Array.from({ length: 26 }, () => "Eine längere Zutatenangabe")), "tight");
+});
+
+
+test("limits preparation entries so complete lines fit the wider column", () => {
+  const instructions = Array.from({ length: 12 }, (_, index) => `Arbeitsschritt ${index + 1} mit einer sehr ausführlichen Erklärung, zusätzlichen Hinweisen und mehreren Handgriffen.`);
+  const summary = summarizeInstructions(instructions);
+  assert.equal(summary.entries.length, 6);
+  assert.ok(summary.entries.every((entry) => entry.text.length <= 92));
+  assert.ok(["normal", "compact", "tight"].includes(preparationDensity(summary.entries)));
 });
