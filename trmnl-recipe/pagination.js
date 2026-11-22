@@ -53,8 +53,8 @@
 
   function preparationDensity(entries) {
     const visualLines = (entries || []).reduce((sum, entry) => sum + Math.max(1, Math.ceil(normalizeText(entry.text).length / 46)), 0);
-    if (visualLines > 14) return "tight";
-    if (visualLines > 10) return "compact";
+    if (visualLines > 10) return "tight";
+    if (visualLines > 7) return "compact";
     return "normal";
   }
 
