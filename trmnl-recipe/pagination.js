@@ -25,7 +25,7 @@
     return instructions.map((instruction) => truncateText(instruction, share)).join("; ");
   }
 
-  function summarizeInstructions(instructions, maxEntries = 6, maxChars = 118) {
+  function summarizeInstructions(instructions, maxEntries = 6, maxChars = 90) {
     const source = (instructions || []).map(normalizeText).filter(Boolean);
     if (!source.length) return { entries: [{ marker: "•", text: "Zubereitung auf der Rezeptseite nachlesen." }], shortened: false };
     const groupCount = Math.min(maxEntries, source.length);
@@ -44,10 +44,17 @@
   }
 
   function ingredientDensity(ingredients) {
-    const visualLines = ingredients.reduce((sum, ingredient) => sum + Math.max(1, Math.ceil(ingredient.length / 34)), 0);
+    const visualLines = ingredients.reduce((sum, ingredient) => sum + Math.max(1, Math.ceil(ingredient.length / 18)), 0);
     const rows = Math.ceil(visualLines / 2);
     if (rows > 12) return "tight";
     if (rows > 9) return "compact";
+    return "normal";
+  }
+
+  function preparationDensity(entries) {
+    const visualLines = (entries || []).reduce((sum, entry) => sum + Math.max(1, Math.ceil(normalizeText(entry.text).length / 46)), 0);
+    if (visualLines > 14) return "tight";
+    if (visualLines > 10) return "compact";
     return "normal";
   }
 
@@ -59,9 +66,10 @@
       ingredients: ingredients.map((text) => ({ marker: "•", text })),
       preparation: preparation.entries,
       preparationShortened: preparation.shortened,
-      ingredientDensity: ingredientDensity(ingredients)
+      ingredientDensity: ingredientDensity(ingredients),
+      preparationDensity: preparationDensity(preparation.entries)
     };
   }
 
-  return { buildRecipeOverview, compactGroup, ingredientDensity, normalizeText, summarizeInstructions, truncateText };
+  return { buildRecipeOverview, compactGroup, ingredientDensity, normalizeText, preparationDensity, summarizeInstructions, truncateText };
 });
