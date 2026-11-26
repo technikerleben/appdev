@@ -82,7 +82,7 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 label.f{display:block;margin:10px 0 4px;font-size:14px;color:var(--mute)}
 /* Bilder */
 .pimg{margin:-12px -14px 12px;cursor:zoom-in;background:#000;border-radius:7px 7px 0 0;overflow:hidden}
-.pimg img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.pimg img{display:block;width:100%;height:auto;max-height:260px;object-fit:cover}
 .cam{margin-left:auto;font-size:12px;color:var(--mute);border:1px solid var(--line);border-radius:10px;padding:1px 7px}
 .cam+.here{margin-left:6px}
 dialog.lb{width:min(1100px,96vw);padding:12px}
@@ -97,7 +97,7 @@ dialog.lb img{display:block;width:100%;max-height:78vh;object-fit:contain;border
   h1{font-size:28px}
   /* Bilder */
 .pimg{margin:-12px -14px 12px;cursor:zoom-in;background:#000;border-radius:7px 7px 0 0;overflow:hidden}
-.pimg img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.pimg img{display:block;width:100%;height:auto;max-height:260px;object-fit:cover}
 .cam{margin-left:auto;font-size:12px;color:var(--mute);border:1px solid var(--line);border-radius:10px;padding:1px 7px}
 .cam+.here{margin-left:6px}
 dialog.lb{width:min(1100px,96vw);padding:12px}
@@ -105,7 +105,7 @@ dialog.lb img{display:block;width:100%;max-height:78vh;object-fit:contain;border
 #compass{bottom:calc(46vh + 12px)}
   body.pmin /* Bilder */
 .pimg{margin:-12px -14px 12px;cursor:zoom-in;background:#000;border-radius:7px 7px 0 0;overflow:hidden}
-.pimg img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.pimg img{display:block;width:100%;height:auto;max-height:260px;object-fit:cover}
 .cam{margin-left:auto;font-size:12px;color:var(--mute);border:1px solid var(--line);border-radius:10px;padding:1px 7px}
 .cam+.here{margin-left:6px}
 dialog.lb{width:min(1100px,96vw);padding:12px}
@@ -427,7 +427,7 @@ document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
 $('grab').onclick=()=>{$('panel').classList.toggle('min');document.body.classList.toggle('pmin')};
 function select(id,fly){sel=id;markSel();renderCard();renderList();
   const p=S.places.find(x=>x.id===id);if(p&&fly)flyTo(toW(p.u,p.v),20);
-  document.querySelector('.tabs button[data-t=orte]').click()}
+  document.querySelector('.tabs button[data-t=orte]').click();$('p-orte').scrollTop=0}
 function renderCard(){
   const p=S.places.find(x=>x.id===sel);const box=$('card');
   if(!p){box.innerHTML='<p class="small">Wähle einen Ort auf der Karte oder in der Liste. Ziehen dreht die Karte, zwei Finger oder rechte Maustaste verschieben, Mausrad oder Spreizen zoomt.</p>';return}
