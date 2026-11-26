@@ -149,7 +149,7 @@ dialog.lb img{display:block;width:100%;max-height:78vh;object-fit:contain;border
     <div id="toks"></div>
     <div class="row"><button class="btn" id="addTok">Figur hinzufügen</button></div>
     <label class="f" for="stepNote">Notiz zur nächsten Etappe (optional)</label>
-    <input type="text" id="stepNote" placeholder="z. B. 2. Nacht, Beschattung von Leomar">
+    <input type="text" id="stepNote" placeholder="z. B. zweiter Abend">
     <h3 id="logTitle">Reiseweg</h3>
     <ul class="log" id="log"></ul>
     <div class="row"><button class="btn" id="undo">Letzte Etappe zurück</button><button class="btn ghost" id="clearTrail">Weg leeren</button></div>
@@ -170,7 +170,7 @@ dialog.lb img{display:block;width:100%;max-height:78vh;object-fit:contain;border
     <h3>Weiter</h3>
     <p class="small"><a href="../thorwal/" style="color:var(--sea)">Thorwal-Cockpit</a> · <a href="../" style="color:var(--sea)">Übersicht Stoerrebrandt</a></p>
     <h3>Quellen</h3>
-    <p class="small">Stadtplan: von dir hochgeladene Karte, als Relief gerendert. Schauplätze und Kürzel aus der Spielleiterplanung (Regionalband), Ortslagen nach dem beschrifteten Plan; nicht verzeichnete Orte sind geschätzt und lassen sich verschieben. Ortsbilder werden aus dem Ordner stoerrebrandt/ geladen.</p>
+    <p class="small">Stadtplan: von dir hochgeladene Karte, als Relief gerendert. Ortslagen nach dem beschrifteten Plan; nicht verzeichnete Orte sind geschätzt und lassen sich verschieben. Ortsbilder werden aus dem Ordner stoerrebrandt/ geladen.</p>
   </section>
 </aside>
 
@@ -183,9 +183,7 @@ dialog.lb img{display:block;width:100%;max-height:78vh;object-fit:contain;border
     <label class="f" for="dCat">Kategorie</label>
     <select id="dCat"></select>
     <label class="f" for="dImg">Bilddatei im Ordner stoerrebrandt/ (optional)</label>
-    <input type="text" id="dImg" placeholder="z. B. o9-tranhafen-karte.webp">
-    <label class="f" for="dDesc">Beschreibung</label>
-    <textarea id="dDesc"></textarea>
+    <input type="text" id="dImg" placeholder="z. B. o9-ortsname.webp">
     <div class="row"><button class="btn" value="cancel" id="dCancel">Abbrechen</button><button class="btn pri" id="dOk" value="ok">Speichern</button></div>
   </form>
 </dialog>
@@ -215,36 +213,36 @@ const CATS={
 };
 // lage: 'plan' = auf dem beschrifteten Stadtplan verzeichnet, sonst geschätzt
 const DEF_PLACES=[
- {id:'WS02',code:'WS02',n:'Stoerrebrandt-Kontor',k:'stoer',u:28,v:56,kn:[3,5,9,10],img:'o1-stoerrebrandt-kontor.webp',d:'Leomars Wirkungsstätte in der fremdländisch geprägten Weststadt, rotes Ziegeldach. Geschäftig, professionell, offen, nicht bedrohlich. Hier liegen die Handelsbücher und das private Archiv; hier findet die Konfrontation statt.'},
- {id:'BU02',code:'BU02',n:'Hafenmeisterei am Bodirufer',k:'hafen',u:64,v:67,kn:[1,5,11],img:'o2-hafenmeisterei-am-bodirufer.webp',d:'Ankünfte, Schiffsbewegungen, Liegeplätze, bekannte Kapitäne, Abfahrten nach Norden. Erster Anlaufpunkt der Suche nach Harkson und später Quelle für aktuelle Abfahrten.'},
- {id:'BU03',code:'BU03',n:'Werft Aril Arnesson',k:'hafen',u:60,v:63,lage:'plan',kn:[2],img:'o8-werft-aril-arnesson.webp',d:'Große, angesehene Werft. Ort für ein ehemaliges Besatzungsmitglied Harksons, das dort heute arbeitet.'},
- {id:'WS08',code:'WS08',n:'Kartothek',k:'wissen',u:24,v:40,kn:[5,11],img:'o3-kartothek.webp',d:'Außergewöhnlich große Kartensammlung. Alte Routen, Inseln, frühere Handelsposten, Entfernungen, historische Seekarten. Schlüsselort, um den Tranhafen zu verorten.'},
- {id:'WS05',code:'WS05',n:'Schule der Hellsicht',k:'wissen',u:21,v:17,lage:'plan',kn:[6],img:'o4-schule-der-hellsicht.webp',d:'Magische Akademie der Erforschung seherischer Phänomene sowie deren Umsetzung Neu Hjaldingard. Analyse magischer Objekte, Hellsicht, Metamagie. Passt zu den Mindorium-Beschlägen und zur Frage nach verborgener Magie.'},
- {id:'T05',code:'T05',n:'Swafnir-Halla',k:'halla',u:50,v:33,kn:[3,4,8],img:'o5-swafnir-halla.webp',d:'Ôle Swafgardsson, Leomars gesellschaftlicher Ruf, moralische Fürsprache.'},
- {id:'OS04',code:'OS04',n:'Folkehalla',k:'macht',u:61,v:40,kn:[8,11],img:'o6-folkehalla.webp',d:'Hier tagen der Rat der Stadt und der Rat der Schiffsführer. Der politische und rechtliche Weg. Auf dem Stadtplan steht an dieser Stelle „Magistrat“.'},
- {id:'WS07',code:'WS07',n:'Ottaskin der Hetleute',k:'macht',u:10,v:32,lage:'plan',kn:[8,11],d:'Sitz des Obersten Hetmanns. Am Tisch heißt er immer Ragnarsson.'},
- {id:'VT03',code:'VT03',n:'Ottaskin der Gischtreiter',k:'macht',u:86,v:12,kn:[4,8,11],d:'Kjaska Brydasdottir und mögliche tatkräftige Unterstützung für die Fahrt nach Norden.'},
- {id:'SM01',code:'SM01',n:'Markthalle',k:'handel',u:40,v:51,lage:'plan',kn:[3,4,5],d:'Handel, Warenströme, Leomars Alltagsruf. Gut für die Plausibilitätsprüfung normaler Geschäfte.'},
- {id:'G04',code:'G04',n:'Glücklicher Zechpreller',k:'gast',u:26,v:64,kn:[2],img:'o7-gluecklicher-zechpreller.webp',d:'Hafenkneipe in der Weststadt. Alte Seeleute, Geschichten über Harkson, direkte und wenig höfliche Auskünfte.'},
- {id:'G12',code:'G12',n:'Schänke Sturmkind',k:'gast',u:49,v:62,kn:[2],d:'Direkter Bezug zur Sturmkinder-Ottajasko. Wenn die Ermittlungen stärker in thorwalsche Gemeinschaften führen sollen.'},
- {id:'G08',code:'G08',n:'Gasthaus Hetmann Oremo',k:'gast',u:46,v:51,kn:[7],d:'Das beste Haus der Stadt. Arvids Quartier und Ort für diskrete Treffen. Gesetzt auf das Gasthaus-Symbol des Stadtplans.'},
- {id:'WS03',code:'WS03',n:'Gästehaus der Stadt',k:'gast',u:22,v:50,kn:[7],d:'Alternative zu G08, falls Arvid formeller auftreten soll.'},
- {id:'G03',code:'G03',n:'Neuer Goldener Aal',k:'gast',u:35,v:60,kn:[1,4],d:'Diente im horasisch-thorwalschen Krieg zeitweise als Lager des Stoerrebrandt-Kontors. Zeigt beiläufig, wie lange Stoerrebrandt zur Stadtgeschichte gehört.'},
- {id:'G02',code:'G02',n:'Herberge Efferds Trunk',k:'gast',u:53,v:66,kn:[1],d:'Seeleute, fremde Händler, Gerüchte. Ankunftsszene ohne politisches Gewicht.'},
- {id:'winterhafen',n:'Winterhafen',k:'hafen',u:42,v:19,lage:'plan',d:'Geschützter Hafen im Norden der Stadt, durch einen Kanal mit der Bucht vor dem Handelshafen verbunden.'},
- {id:'handelshafen',n:'Handelshafen',k:'hafen',u:52,v:76,lage:'plan',kn:[4],d:'Haupthafen am Golf von Prem. Hier kennen Händler, Arbeiter und kleine Schiffsgemeinschaften Leomar persönlich.'},
- {id:'viehmarkt',n:'Viehmarkt',k:'handel',u:44,v:60,lage:'plan',d:'Viehmarkt am Hafenufer zwischen Mole und Handelskai.'},
- {id:'beilunker',n:'Beilunker Reiter',k:'handel',u:68,v:58,lage:'plan',d:'Station der Beilunker Reiter – Botendienst für Briefe und eilige Nachrichten.'},
- {id:'archivar',n:'Archivar',k:'wissen',u:18,v:63,lage:'plan',d:'Auf dem Stadtplan als Archivar verzeichnet.'},
- {id:'garde',n:'Garde',k:'wehr',u:69,v:32,lage:'plan',d:'Wache der Stadtgarde.'},
- {id:'osttor',n:'Osttor',k:'wehr',u:75,v:28,lage:'plan',d:'Östliches Stadttor, Ausgang zum Bodirtal und ins Landesinnere.'},
- {id:'bodirtor',n:'Bodirtor',k:'wehr',u:70,v:66,lage:'plan',d:'Tor im Südosten zur Bodirmündung.'},
- {id:'zwingfeste',n:'Zwingfeste',k:'wehr',u:14,v:84,lage:'plan',d:'Festung an der Südwestspitze, die die Einfahrt zum Hafen beherrscht.'},
- {id:'v-west',n:'Weststadt',k:'viertel',u:26,v:44,d:'Fremdländisch geprägt, buntes Völkergemisch.'},
- {id:'v-ost',n:'Oststadt',k:'viertel',u:74,v:46,d:'Thorwalsch geprägt, viele Langhäuser.'},
- {id:'v-bodir',n:'Bodir',k:'viertel',u:84,v:83,d:'Mündung des Bodir in den Golf von Prem.'}
+ {id:'ws02',n:'Stoerrebrandt-Kontor',k:'stoer',u:28,v:56,img:'o1-stoerrebrandt-kontor.webp'},
+ {id:'bu02',n:'Hafenmeisterei am Bodirufer',k:'hafen',u:64,v:67,img:'o2-hafenmeisterei-am-bodirufer.webp'},
+ {id:'bu03',n:'Werft Aril Arnesson',k:'hafen',u:60,v:63,lage:'plan',img:'o8-werft-aril-arnesson.webp'},
+ {id:'ws08',n:'Kartothek',k:'wissen',u:24,v:40,img:'o3-kartothek.webp'},
+ {id:'ws05',n:'Schule der Hellsicht',k:'wissen',u:21,v:17,lage:'plan',img:'o4-schule-der-hellsicht.webp'},
+ {id:'t05',n:'Swafnir-Halla',k:'halla',u:50,v:33,img:'o5-swafnir-halla.webp'},
+ {id:'os04',n:'Folkehalla',k:'macht',u:61,v:40,img:'o6-folkehalla.webp'},
+ {id:'ws07',n:'Ottaskin der Hetleute',k:'macht',u:10,v:32,lage:'plan'},
+ {id:'vt03',n:'Ottaskin der Gischtreiter',k:'macht',u:86,v:12},
+ {id:'sm01',n:'Markthalle',k:'handel',u:40,v:51,lage:'plan'},
+ {id:'g04',n:'Glücklicher Zechpreller',k:'gast',u:26,v:64,img:'o7-gluecklicher-zechpreller.webp'},
+ {id:'g12',n:'Schänke Sturmkind',k:'gast',u:49,v:62},
+ {id:'g08',n:'Gasthaus Hetmann Oremo',k:'gast',u:46,v:51},
+ {id:'ws03',n:'Gästehaus der Stadt',k:'gast',u:22,v:50},
+ {id:'g03',n:'Neuer Goldener Aal',k:'gast',u:35,v:60},
+ {id:'g02',n:'Herberge Efferds Trunk',k:'gast',u:53,v:66},
+ {id:'winterhafen',n:'Winterhafen',k:'hafen',u:42,v:19,lage:'plan'},
+ {id:'handelshafen',n:'Handelshafen',k:'hafen',u:52,v:76,lage:'plan'},
+ {id:'viehmarkt',n:'Viehmarkt',k:'handel',u:44,v:60,lage:'plan'},
+ {id:'beilunker',n:'Beilunker Reiter',k:'handel',u:68,v:58,lage:'plan'},
+ {id:'archivar',n:'Archivar',k:'wissen',u:18,v:63,lage:'plan'},
+ {id:'garde',n:'Garde',k:'wehr',u:69,v:32,lage:'plan'},
+ {id:'osttor',n:'Osttor',k:'wehr',u:75,v:28,lage:'plan'},
+ {id:'bodirtor',n:'Bodirtor',k:'wehr',u:70,v:66,lage:'plan'},
+ {id:'zwingfeste',n:'Zwingfeste',k:'wehr',u:14,v:84,lage:'plan'},
+ {id:'v-west',n:'Weststadt',k:'viertel',u:26,v:44},
+ {id:'v-ost',n:'Oststadt',k:'viertel',u:74,v:46},
+ {id:'v-bodir',n:'Bodir',k:'viertel',u:84,v:83}
 ];
-const DEF_TOKENS=[{id:'t1',n:'Helden',c:'#e23b30',u:52,v:72,trail:[{u:52,v:72,at:'Ankunft im Handelshafen',note:''}]}];
+const DEF_TOKENS=[{id:'t1',n:'Helden',c:'#e23b30',u:52,v:72,trail:[{u:52,v:72,at:'Handelshafen',note:''}]}];
 const IMG_BASE=location.protocol==='file:'?'../':new URL('/stoerrebrandt/',location.href).href;
 const imgCache={};
 function findImg(p){if(!p.img)return Promise.resolve(null);const url=/^(https?:|data:|\/)/.test(p.img)?p.img:IMG_BASE+p.img;
@@ -255,6 +253,8 @@ let S;
 function fresh(){return {places:clone(DEF_PLACES),tokens:clone(DEF_TOKENS),active:'t1',notes:{}}}
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!S.places)S=fresh();
+// Karte enthält nur Ortsnamen: Zusatzangaben früherer Stände entfernen
+for(const p of S.places){delete p.d;delete p.kn;delete p.code}
 // Ortsbilder liegen als .webp vor (frühere Stände speicherten .png)
 for(const p of S.places)if(p.img&&/^o[1-9]-[a-z-]+\.png$/.test(p.img))p.img=p.img.replace(/\.png$/,'.webp');
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
@@ -432,9 +432,9 @@ function renderCard(){
   const p=S.places.find(x=>x.id===sel);const box=$('card');
   if(!p){box.innerHTML='<p class="small">Wähle einen Ort auf der Karte oder in der Liste. Ziehen dreht die Karte, zwei Finger oder rechte Maustaste verschieben, Mausrad oder Spreizen zoomt.</p>';return}
   const c=CATS[p.k]?.c||'#fff';const here=S.tokens.filter(t=>Math.hypot(t.u-p.u,t.v-p.v)<1.8).map(t=>t.n);
-  box.innerHTML=`<div class="card" style="--c:${c}"><div class="pimg" id="pimg" hidden></div><div class="cat">${esc(CATS[p.k]?.n||'')}${p.code?' · '+esc(p.code):''}${p.kn&&p.kn.length?' · Knoten '+esc(p.kn.join(', ')):''}</div><h2>${esc(p.n)}</h2>
+  box.innerHTML=`<div class="card" style="--c:${c}"><div class="pimg" id="pimg" hidden></div><div class="cat">${esc(CATS[p.k]?.n||'')}</div><h2>${esc(p.n)}</h2>
   ${here.length?`<p><span class="here">${esc(here.join(', '))} hier</span></p>`:''}
-  <p>${esc(p.d)}</p>${p.k!=='viertel'&&p.lage!=='plan'?'<p class="small">Lage geschätzt – mit „Verschieben“ an die richtige Stelle setzen.</p>':''}
+  ${p.k!=='viertel'&&p.lage!=='plan'?'<p class="small">Lage geschätzt – mit „Verschieben“ an die richtige Stelle setzen.</p>':''}
   <label class="f" for="note">Spielleiter-Notizen</label><textarea id="note" placeholder="Wer ist hier? Was finden die Helden?">${esc(S.notes[p.id]||'')}</textarea>
   <div class="row"><button class="btn pri" id="go">${esc(activeTok().n)} hierher</button><button class="btn" id="fly">Hinfliegen</button></div>
   <div class="row"><button class="btn ghost" id="edit">Bearbeiten</button><button class="btn ghost" id="mv">Verschieben</button><button class="btn ghost" id="del">Entfernen</button></div></div>`;
@@ -481,12 +481,12 @@ $('clearTrail').onclick=()=>{const t=activeTok();t.trail=[{u:t.u,v:t.v,at:placeN
 // Dialog
 let dlgCtx=null;
 $('dCat').innerHTML=Object.entries(CATS).map(([k,c])=>`<option value="${k}">${esc(c.n)}</option>`).join('');
-function openDlg(p,u,v){dlgCtx={p,u,v};$('dlgT').textContent=p?'Ort bearbeiten':'Neuer Ort';$('dName').value=p?p.n:'';$('dCat').value=p?p.k:'stoer';$('dDesc').value=p?p.d:'';$('dImg').value=p?(p.img||''):'';$('dlg').showModal();$('dName').focus()}
+function openDlg(p,u,v){dlgCtx={p,u,v};$('dlgT').textContent=p?'Ort bearbeiten':'Neuer Ort';$('dName').value=p?p.n:'';$('dCat').value=p?p.k:'stoer';$('dImg').value=p?(p.img||''):'';$('dlg').showModal();$('dName').focus()}
 $('dlgForm').addEventListener('submit',e=>{const btn=e.submitter;if(!btn||btn.value!=='ok'){$('dlg').close();e.preventDefault();return}
   e.preventDefault();const n=$('dName').value.trim();if(!n)return;
   const img=$('dImg').value.trim();
-  if(dlgCtx.p){Object.assign(dlgCtx.p,{n,k:$('dCat').value,d:$('dDesc').value,img})}
-  else{const id='c'+Date.now();S.places.push({id,n,k:$('dCat').value,u:dlgCtx.u,v:dlgCtx.v,d:$('dDesc').value,img});sel=id}
+  if(dlgCtx.p){Object.assign(dlgCtx.p,{n,k:$('dCat').value,img})}
+  else{const id='c'+Date.now();S.places.push({id,n,k:$('dCat').value,u:dlgCtx.u,v:dlgCtx.v,img});sel=id}
   save();scanImgs();buildPins();renderCard();renderList();$('dlg').close()});
 
 // Ansicht

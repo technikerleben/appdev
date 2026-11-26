@@ -50,3 +50,5 @@ Wenn diese Ausnahme irgendwann stören sollte, lässt sich das Skript pro Cockpi
 ## Daten
 
 Notizen, Marker, Knotenfortschritt und die Heldengruppe liegen im `localStorage` des jeweiligen Browsers, getrennt pro Cockpit (`havena-cockpit-v2`, `thorwal-cockpit-v1`). Sie wandern nicht zwischen Geräten. Jedes Cockpit hat oben rechts „Sichern“ und „Laden“ für den Export als JSON.
+
+Die Karte enthält bewusst nur Ortsnamen und Bilder, keine Abenteuerinhalte. Beschreibungen, Knoten und Kürzel stehen ausschließlich im Cockpit und im Material.
