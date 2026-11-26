@@ -2,6 +2,10 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
+<script>
+/* Ohne abschließenden Schrägstrich (/stoerrebrandt/karte) würden vendor/-Pfade ins Elternverzeichnis zeigen */
+if(location.protocol!=='file:'&&/\/karte$/.test(location.pathname))document.write('<base href="'+location.pathname+'/">');
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Thorwal 3D-Karte</title>
 <style>
