@@ -179,7 +179,7 @@ dialog.lb img{display:block;width:100%;max-height:78vh;object-fit:contain;border
     <label class="f" for="dCat">Kategorie</label>
     <select id="dCat"></select>
     <label class="f" for="dImg">Bilddatei im Ordner stoerrebrandt/ (optional)</label>
-    <input type="text" id="dImg" placeholder="z. B. o9-tranhafen-karte.png">
+    <input type="text" id="dImg" placeholder="z. B. o9-tranhafen-karte.webp">
     <label class="f" for="dDesc">Beschreibung</label>
     <textarea id="dDesc"></textarea>
     <div class="row"><button class="btn" value="cancel" id="dCancel">Abbrechen</button><button class="btn pri" id="dOk" value="ok">Speichern</button></div>
@@ -211,17 +211,17 @@ const CATS={
 };
 // lage: 'plan' = auf dem beschrifteten Stadtplan verzeichnet, sonst geschätzt
 const DEF_PLACES=[
- {id:'WS02',code:'WS02',n:'Stoerrebrandt-Kontor',k:'stoer',u:28,v:56,kn:[3,5,9,10],img:'o1-stoerrebrandt-kontor.png',d:'Leomars Wirkungsstätte in der fremdländisch geprägten Weststadt, rotes Ziegeldach. Geschäftig, professionell, offen, nicht bedrohlich. Hier liegen die Handelsbücher und das private Archiv; hier findet die Konfrontation statt.'},
- {id:'BU02',code:'BU02',n:'Hafenmeisterei am Bodirufer',k:'hafen',u:64,v:67,kn:[1,5,11],img:'o2-hafenmeisterei-am-bodirufer.png',d:'Ankünfte, Schiffsbewegungen, Liegeplätze, bekannte Kapitäne, Abfahrten nach Norden. Erster Anlaufpunkt der Suche nach Harkson und später Quelle für aktuelle Abfahrten.'},
- {id:'BU03',code:'BU03',n:'Werft Aril Arnesson',k:'hafen',u:60,v:63,lage:'plan',kn:[2],img:'o8-werft-aril-arnesson.png',d:'Große, angesehene Werft. Ort für ein ehemaliges Besatzungsmitglied Harksons, das dort heute arbeitet.'},
- {id:'WS08',code:'WS08',n:'Kartothek',k:'wissen',u:24,v:40,kn:[5,11],img:'o3-kartothek.png',d:'Außergewöhnlich große Kartensammlung. Alte Routen, Inseln, frühere Handelsposten, Entfernungen, historische Seekarten. Schlüsselort, um den Tranhafen zu verorten.'},
- {id:'WS05',code:'WS05',n:'Schule der Hellsicht',k:'wissen',u:21,v:17,lage:'plan',kn:[6],img:'o4-schule-der-hellsicht.png',d:'Magische Akademie der Erforschung seherischer Phänomene sowie deren Umsetzung Neu Hjaldingard. Analyse magischer Objekte, Hellsicht, Metamagie. Passt zu den Mindorium-Beschlägen und zur Frage nach verborgener Magie.'},
- {id:'T05',code:'T05',n:'Swafnir-Halla',k:'halla',u:50,v:33,kn:[3,4,8],img:'o5-swafnir-halla.png',d:'Ôle Swafgardsson, Leomars gesellschaftlicher Ruf, moralische Fürsprache.'},
- {id:'OS04',code:'OS04',n:'Folkehalla',k:'macht',u:61,v:40,kn:[8,11],img:'o6-folkehalla.png',d:'Hier tagen der Rat der Stadt und der Rat der Schiffsführer. Der politische und rechtliche Weg. Auf dem Stadtplan steht an dieser Stelle „Magistrat“.'},
+ {id:'WS02',code:'WS02',n:'Stoerrebrandt-Kontor',k:'stoer',u:28,v:56,kn:[3,5,9,10],img:'o1-stoerrebrandt-kontor.webp',d:'Leomars Wirkungsstätte in der fremdländisch geprägten Weststadt, rotes Ziegeldach. Geschäftig, professionell, offen, nicht bedrohlich. Hier liegen die Handelsbücher und das private Archiv; hier findet die Konfrontation statt.'},
+ {id:'BU02',code:'BU02',n:'Hafenmeisterei am Bodirufer',k:'hafen',u:64,v:67,kn:[1,5,11],img:'o2-hafenmeisterei-am-bodirufer.webp',d:'Ankünfte, Schiffsbewegungen, Liegeplätze, bekannte Kapitäne, Abfahrten nach Norden. Erster Anlaufpunkt der Suche nach Harkson und später Quelle für aktuelle Abfahrten.'},
+ {id:'BU03',code:'BU03',n:'Werft Aril Arnesson',k:'hafen',u:60,v:63,lage:'plan',kn:[2],img:'o8-werft-aril-arnesson.webp',d:'Große, angesehene Werft. Ort für ein ehemaliges Besatzungsmitglied Harksons, das dort heute arbeitet.'},
+ {id:'WS08',code:'WS08',n:'Kartothek',k:'wissen',u:24,v:40,kn:[5,11],img:'o3-kartothek.webp',d:'Außergewöhnlich große Kartensammlung. Alte Routen, Inseln, frühere Handelsposten, Entfernungen, historische Seekarten. Schlüsselort, um den Tranhafen zu verorten.'},
+ {id:'WS05',code:'WS05',n:'Schule der Hellsicht',k:'wissen',u:21,v:17,lage:'plan',kn:[6],img:'o4-schule-der-hellsicht.webp',d:'Magische Akademie der Erforschung seherischer Phänomene sowie deren Umsetzung Neu Hjaldingard. Analyse magischer Objekte, Hellsicht, Metamagie. Passt zu den Mindorium-Beschlägen und zur Frage nach verborgener Magie.'},
+ {id:'T05',code:'T05',n:'Swafnir-Halla',k:'halla',u:50,v:33,kn:[3,4,8],img:'o5-swafnir-halla.webp',d:'Ôle Swafgardsson, Leomars gesellschaftlicher Ruf, moralische Fürsprache.'},
+ {id:'OS04',code:'OS04',n:'Folkehalla',k:'macht',u:61,v:40,kn:[8,11],img:'o6-folkehalla.webp',d:'Hier tagen der Rat der Stadt und der Rat der Schiffsführer. Der politische und rechtliche Weg. Auf dem Stadtplan steht an dieser Stelle „Magistrat“.'},
  {id:'WS07',code:'WS07',n:'Ottaskin der Hetleute',k:'macht',u:10,v:32,lage:'plan',kn:[8,11],d:'Sitz des Obersten Hetmanns. Am Tisch heißt er immer Ragnarsson.'},
  {id:'VT03',code:'VT03',n:'Ottaskin der Gischtreiter',k:'macht',u:86,v:12,kn:[4,8,11],d:'Kjaska Brydasdottir und mögliche tatkräftige Unterstützung für die Fahrt nach Norden.'},
  {id:'SM01',code:'SM01',n:'Markthalle',k:'handel',u:40,v:51,lage:'plan',kn:[3,4,5],d:'Handel, Warenströme, Leomars Alltagsruf. Gut für die Plausibilitätsprüfung normaler Geschäfte.'},
- {id:'G04',code:'G04',n:'Glücklicher Zechpreller',k:'gast',u:26,v:64,kn:[2],img:'o7-gluecklicher-zechpreller.png',d:'Hafenkneipe in der Weststadt. Alte Seeleute, Geschichten über Harkson, direkte und wenig höfliche Auskünfte.'},
+ {id:'G04',code:'G04',n:'Glücklicher Zechpreller',k:'gast',u:26,v:64,kn:[2],img:'o7-gluecklicher-zechpreller.webp',d:'Hafenkneipe in der Weststadt. Alte Seeleute, Geschichten über Harkson, direkte und wenig höfliche Auskünfte.'},
  {id:'G12',code:'G12',n:'Schänke Sturmkind',k:'gast',u:49,v:62,kn:[2],d:'Direkter Bezug zur Sturmkinder-Ottajasko. Wenn die Ermittlungen stärker in thorwalsche Gemeinschaften führen sollen.'},
  {id:'G08',code:'G08',n:'Gasthaus Hetmann Oremo',k:'gast',u:46,v:51,kn:[7],d:'Das beste Haus der Stadt. Arvids Quartier und Ort für diskrete Treffen. Gesetzt auf das Gasthaus-Symbol des Stadtplans.'},
  {id:'WS03',code:'WS03',n:'Gästehaus der Stadt',k:'gast',u:22,v:50,kn:[7],d:'Alternative zu G08, falls Arvid formeller auftreten soll.'},
@@ -251,6 +251,8 @@ let S;
 function fresh(){return {places:clone(DEF_PLACES),tokens:clone(DEF_TOKENS),active:'t1',notes:{}}}
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!S.places)S=fresh();
+// Ortsbilder liegen als .webp vor (frühere Stände speicherten .png)
+for(const p of S.places)if(p.img&&/^o[1-9]-[a-z-]+\.png$/.test(p.img))p.img=p.img.replace(/\.png$/,'.webp');
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $=id=>document.getElementById(id);
