@@ -9,7 +9,7 @@
   :root{ --ink:#2a2118; --faded:#5d4f3e; --rule:#b9a380; --seal:#7a2f28; --paper:#f1e5cc; }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:#6f6150}
-  body{font-family:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+  body{font-family:Cardo,'Crimson Text','Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
        color:var(--ink);line-height:1.5;font-size:10.6pt;padding:1.5rem 0}
   .sheet{width:210mm;min-height:297mm;margin:0 auto 1.5rem;padding:20mm;background:var(--paper);
     background-image:
@@ -32,12 +32,12 @@
   .akte{position:absolute;top:9mm;right:16mm;font-size:8.2pt;letter-spacing:.11em;color:var(--faded)}
   .foot{position:absolute;bottom:10mm;left:20mm;right:20mm;display:flex;justify-content:space-between;
     font-size:8pt;color:var(--faded)}
-  .hand{font-family:'Bradley Hand','Segoe Script','Comic Sans MS',cursive;color:var(--faded)}
-  .note{font-family:'Bradley Hand','Segoe Script','Comic Sans MS',cursive;color:var(--faded);font-size:9pt}
-  .slip{max-width:118mm;margin:14mm auto;padding:9mm 10mm;border:1px solid var(--rule);
+  .hand{font-family:Cardo,'Crimson Text','Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;font-style:italic;color:var(--faded)}
+  .note{font-family:Cardo,'Crimson Text','Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;font-style:italic;color:var(--faded);font-size:9pt}
+  .slip{max-width:118mm;margin:0 auto;padding:9mm 10mm;border:1px solid var(--rule);
     box-shadow:0 2px 10px rgba(110,84,52,.18);background:rgba(255,252,240,.5)}
   .slip h2{margin-top:0;text-align:center}
-  .kv{display:grid;grid-template-columns:auto 1fr;gap:.16rem .9rem;margin:.6rem 0}
+  .kv{display:grid;grid-template-columns:56mm 1fr;gap:.16rem .9rem;margin:.6rem 0}.sheet.centered{display:flex;flex-direction:column;justify-content:center}
   .kv dt{color:var(--faded)} .kv dd{margin:0}
   .two{display:grid;grid-template-columns:1fr 1fr;gap:6mm}
   .two section{border:1px solid var(--rule);padding:4mm}
@@ -52,8 +52,9 @@
   .toc h2{margin:.1rem 0 .5rem} .toc a{color:#2f4f63}
   @media print{
     html,body{background:#fff;padding:0}
+    .sheet{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     .toc{display:none}
-    .sheet{margin:0;box-shadow:none;width:auto;min-height:auto;page-break-after:always}
+    .sheet{margin:0;box-shadow:none;width:210mm;height:297mm;min-height:297mm;page-break-after:always}
     .sheet:last-child{page-break-after:auto}
     @page{size:A4;margin:0}
   }
@@ -86,6 +87,10 @@
       <tr><td>11.</td><td>Tochter des Sturms</td><td>Garvald Arnesson</td><td>auslaufend</td><td>Pelzwerk</td><td>—</td></tr>
       <tr><td>12.</td><td>Hjaldings Erbe</td><td>Ragna Sverdsdottir</td><td>Thorwal</td><td>Werftprobe</td><td>Bodir 1</td></tr>
       <tr><td>13.</td><td>Horas' Gunst</td><td>Fabrizio Carvallho</td><td>auslaufend</td><td>Bernstein, Tran</td><td>—</td></tr>
+      <tr><td>14.</td><td>Seeotter</td><td>Hjalde Ulfsdottir</td><td>Olport</td><td>Pelzwerk, Tran</td><td>Bodir 4</td></tr>
+      <tr><td>15.</td><td>Wellenbrecher</td><td>Torge Hjaldesson</td><td>Thorwal</td><td>Fisch, Salz</td><td>Bodir 11</td></tr>
+      <tr><td>16.</td><td>Mövenschrei</td><td>Birka Hjoresdottir</td><td>auslaufend</td><td>Eisenwaren</td><td>—</td></tr>
+      <tr><td>17.</td><td>Nordstern</td><td>Olmar Tjalfsson</td><td>auslaufend</td><td>Tauwerk, Öl</td><td>—</td></tr>
     </tbody>
   </table>
 
@@ -107,7 +112,7 @@
 </section>
 
 <!-- T2 -->
-<section class="sheet">
+<section class="sheet centered">
   <div class="akte">bei den Werftpapieren</div>
   <div class="slip">
     <h2>Heuerzettel</h2>
@@ -181,58 +186,94 @@
   <h1>Seekarte, nördliche Schären</h1>
   <p class="sub">Aufgenommen im Jahre 1012 nach Bosparans Fall · Ausschnitt</p>
   <hr class="rule">
-  <svg viewBox="0 0 560 420" style="width:100%;height:auto" role="img" aria-label="Alte Seekarte der nördlichen Schären mit eingezeichnetem Handelsposten Tranhafen">
-    <rect width="560" height="420" fill="rgba(255,250,235,.35)"/>
-    <g stroke="#8a7458" fill="none" stroke-width="1.6">
-      <path d="M8 300 C70 286, 96 318, 150 306 C206 294, 228 330, 292 322 C352 314, 388 344, 452 334 C500 327, 530 348, 552 340"/>
-      <path d="M8 316 C70 302, 96 334, 150 322 C206 310, 228 346, 292 338 C352 330, 388 360, 452 350 C500 343, 530 364, 552 356" stroke-width=".8" opacity=".5"/>
+  <svg viewBox="0 0 560 500" style="width:100%;height:auto" role="img" aria-label="Alte Seekarte der nördlichen Schären mit eingezeichnetem Handelsposten Tranhafen">
+    <defs>
+      <pattern id="land" width="7" height="7" patternTransform="rotate(38)" patternUnits="userSpaceOnUse">
+        <line x1="0" y1="0" x2="0" y2="7" stroke="#8a7458" stroke-width=".7" opacity=".55"/>
+      </pattern>
+    </defs>
+
+    <!-- Festlandküste unten -->
+    <path d="M0 432 C70 418, 104 454, 162 440 C222 426, 246 466, 312 456 C374 447, 410 480, 476 468 C520 460, 540 480, 560 472 L560 500 L0 500 Z"
+          fill="url(#land)" stroke="#8a7458" stroke-width="1.6"/>
+    <path d="M0 448 C70 434, 104 470, 162 456 C222 442, 246 482, 312 472 C374 463, 410 496, 476 484 C520 476, 540 496, 560 488"
+          fill="none" stroke="#8a7458" stroke-width=".7" opacity=".45"/>
+
+    <!-- Schären -->
+    <g fill="url(#land)" stroke="#8a7458" stroke-width="1.1">
+      <ellipse cx="120" cy="300" rx="34" ry="14" transform="rotate(-9 120 300)"/>
+      <ellipse cx="196" cy="246" rx="19" ry="9" transform="rotate(12 196 246)"/>
+      <ellipse cx="268" cy="322" rx="42" ry="17" transform="rotate(-5 268 322)"/>
+      <ellipse cx="344" cy="248" rx="15" ry="8"/>
+      <ellipse cx="404" cy="356" rx="27" ry="12" transform="rotate(8 404 356)"/>
+      <ellipse cx="452" cy="268" rx="21" ry="10" transform="rotate(-14 452 268)"/>
+      <ellipse cx="306" cy="190" rx="10" ry="6"/>
+      <ellipse cx="238" cy="168" rx="8" ry="5"/>
+      <ellipse cx="412" cy="178" rx="12" ry="6"/>
+      <ellipse cx="492" cy="348" rx="17" ry="8" transform="rotate(6 492 348)"/>
+      <ellipse cx="82" cy="224" rx="12" ry="7"/>
+      <ellipse cx="162" cy="366" rx="14" ry="7"/>
+      <ellipse cx="226" cy="402" rx="10" ry="5"/>
+      <ellipse cx="434" cy="404" rx="13" ry="6"/>
     </g>
-    <g fill="#8a7458" opacity=".9">
-      <ellipse cx="128" cy="222" rx="30" ry="13" transform="rotate(-9 128 222)"/>
-      <ellipse cx="196" cy="186" rx="17" ry="8" transform="rotate(12 196 186)"/>
-      <ellipse cx="262" cy="232" rx="38" ry="15" transform="rotate(-5 262 232)"/>
-      <ellipse cx="330" cy="178" rx="13" ry="7"/>
-      <ellipse cx="368" cy="226" rx="24" ry="11" transform="rotate(8 368 226)"/>
-      <ellipse cx="432" cy="196" rx="19" ry="9" transform="rotate(-14 432 196)"/>
-      <ellipse cx="300" cy="140" rx="9" ry="5"/>
-      <ellipse cx="236" cy="120" rx="7" ry="4"/>
-      <ellipse cx="404" cy="128" rx="11" ry="5"/>
-      <ellipse cx="478" cy="248" rx="15" ry="7" transform="rotate(6 478 248)"/>
-      <ellipse cx="86" cy="170" rx="11" ry="6"/>
-      <ellipse cx="160" cy="262" rx="13" ry="6"/>
+
+    <!-- Untiefen -->
+    <g fill="#8a7458" opacity=".5">
+      <circle cx="150" cy="268" r="1.5"/><circle cx="158" cy="274" r="1.5"/><circle cx="144" cy="276" r="1.5"/>
+      <circle cx="330" cy="356" r="1.5"/><circle cx="338" cy="362" r="1.5"/><circle cx="324" cy="364" r="1.5"/>
+      <circle cx="470" cy="312" r="1.5"/><circle cx="478" cy="318" r="1.5"/>
     </g>
-    <g fill="#8a7458" font-size="8" font-family="Georgia, serif" opacity=".75">
-      <text x="110" y="90">14</text><text x="180" y="112">9</text><text x="250" y="86">17</text>
-      <text x="320" y="106">11</text><text x="390" y="88">22</text><text x="460" y="112">8</text>
-      <text x="150" y="150">6</text><text x="286" y="196">4</text><text x="412" y="166">7</text>
-      <text x="500" y="196">19</text><text x="60" y="130">12</text>
+
+    <!-- Tiefenangaben -->
+    <g fill="#8a7458" font-size="8.5" font-family="Cardo, serif" opacity=".72">
+      <text x="104" y="150">14</text><text x="178" y="186">9</text><text x="254" y="140">17</text>
+      <text x="330" y="166">11</text><text x="398" y="132">22</text><text x="470" y="168">8</text>
+      <text x="146" y="206">6</text><text x="292" y="282">4</text><text x="424" y="226">7</text>
+      <text x="512" y="252">19</text><text x="58" y="178">12</text><text x="250" y="414">3</text>
+      <text x="368" y="402">5</text><text x="104" y="336">8</text>
     </g>
-    <g stroke="#7a2f28" fill="none" stroke-width="1.5" stroke-dasharray="7 5" opacity=".85">
-      <path d="M548 372 C470 352, 404 300, 300 250"/>
-      <path d="M20 372 C110 344, 190 300, 290 252"/>
+
+    <!-- nachgetragene Kurse, aus offener See von Osten -->
+    <g stroke="#7a2f28" fill="none" stroke-width="1.6" stroke-dasharray="8 5" opacity=".85">
+      <path d="M556 196 C486 206, 412 232, 346 282 C330 294, 318 302, 300 310"/>
+      <path d="M556 420 C480 412, 406 374, 344 332 C330 322, 316 316, 300 312"/>
     </g>
+
+    <!-- Handelsposten -->
     <g>
-      <rect x="282" y="222" width="14" height="14" fill="none" stroke="#7a2f28" stroke-width="2"/>
-      <line x1="289" y1="222" x2="289" y2="236" stroke="#7a2f28" stroke-width="1"/>
-      <line x1="282" y1="229" x2="296" y2="229" stroke="#7a2f28" stroke-width="1"/>
-      <text x="304" y="234" font-size="13" font-family="Georgia, serif" fill="#7a2f28" font-style="italic">Tranhafen</text>
+      <rect x="288" y="296" width="15" height="15" fill="rgba(122,47,40,.10)" stroke="#7a2f28" stroke-width="2"/>
+      <line x1="295.5" y1="296" x2="295.5" y2="311" stroke="#7a2f28" stroke-width="1"/>
+      <line x1="288" y1="303.5" x2="303" y2="303.5" stroke="#7a2f28" stroke-width="1"/>
+      <text x="312" y="309" font-size="14" font-family="Cardo, serif" fill="#7a2f28" font-style="italic">Tranhafen</text>
     </g>
-    <g transform="translate(486,74)">
-      <circle r="30" fill="none" stroke="#8a7458" stroke-width="1.2"/>
-      <circle r="21" fill="none" stroke="#8a7458" stroke-width=".6" opacity=".6"/>
-      <path d="M0 -30 L7 0 L0 30 L-7 0 Z" fill="#8a7458" opacity=".85"/>
-      <path d="M-30 0 L0 -6 L30 0 L0 6 Z" fill="#8a7458" opacity=".35"/>
-      <text x="-4" y="-34" font-size="9" font-family="Georgia, serif" fill="#8a7458">N</text>
+
+    <!-- Kompassrose -->
+    <g transform="translate(486,96)">
+      <circle r="32" fill="none" stroke="#8a7458" stroke-width="1.2"/>
+      <circle r="22" fill="none" stroke="#8a7458" stroke-width=".6" opacity=".6"/>
+      <path d="M0 -32 L7 0 L0 32 L-7 0 Z" fill="#8a7458" opacity=".8"/>
+      <path d="M-32 0 L0 -6 L32 0 L0 6 Z" fill="#8a7458" opacity=".3"/>
+      <text x="-4" y="-36" font-size="9.5" font-family="Cardo, serif" fill="#8a7458">N</text>
     </g>
-    <text x="24" y="44" font-size="12" font-family="Georgia, serif" fill="#8a7458" font-style="italic">Nördliche Schären, Aufnahme 1012</text>
-    <text x="24" y="400" font-size="9" font-family="Georgia, serif" fill="#8a7458">Tiefen in Schritt bei mittlerem Wasser. Schären unvollständig aufgenommen.</text>
+
+    <!-- Maßstab -->
+    <g transform="translate(56,406)" stroke="#8a7458" fill="#8a7458">
+      <line x1="0" y1="0" x2="120" y2="0" stroke-width="1.2"/>
+      <line x1="0" y1="-4" x2="0" y2="4" stroke-width="1.2"/>
+      <line x1="60" y1="-3" x2="60" y2="3" stroke-width="1"/>
+      <line x1="120" y1="-4" x2="120" y2="4" stroke-width="1.2"/>
+      <text x="0" y="16" font-size="8" font-family="Cardo, serif" stroke="none">0</text>
+      <text x="112" y="16" font-size="8" font-family="Cardo, serif" stroke="none">10 Meilen</text>
+    </g>
+
+    <text x="24" y="40" font-size="12.5" font-family="Cardo, serif" fill="#8a7458" font-style="italic">Nördliche Schären, Aufnahme 1012</text>
   </svg>
-  <p class="note" style="text-align:right;margin-top:.4rem">Kurse nachgetragen · 1041</p>
+  <p class="note" style="display:flex;justify-content:space-between;margin-top:.5rem"><span>Tiefen in Schritt bei mittlerem Wasser. Schären unvollständig aufgenommen.</span><span>Kurse nachgetragen · 1041</span></p>
   <div class="foot"><span>Kartothek Thorwal</span><span>Bestand 1012</span></div>
 </section>
 
 <!-- T5 -->
-<section class="sheet">
+<section class="sheet centered">
   <div class="akte">ohne Kopf, ohne Siegel</div>
   <div class="slip">
     <h2>Vermerk zur Vorlage</h2>
@@ -285,7 +326,7 @@
 </section>
 
 <!-- T8 -->
-<section class="sheet">
+<section class="sheet centered">
   <div class="akte">vertraulich</div>
   <div class="slip" style="max-width:132mm">
     <h2>Vermerk</h2>

@@ -9,9 +9,9 @@
   :root{ --ink:#2a2118; --faded:#5d4f3e; --rule:#b9a380; --seal:#7a2f28; --paper:#f1e5cc; }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:#6f6150}
-  body{font-family:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
-       color:var(--ink);line-height:1.52;font-size:10.6pt;padding:1.5rem 0}
-  .sheet{width:210mm;min-height:297mm;margin:0 auto 1.5rem;padding:22mm 20mm 20mm;background:var(--paper);
+  body{font-family:Cardo,'Crimson Text','Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+       color:var(--ink);line-height:1.44;font-size:10.3pt;padding:1.5rem 0}
+  .sheet{width:210mm;min-height:297mm;margin:0 auto 1.5rem;padding:20mm 32mm 22mm;background:var(--paper);
     background-image:
       radial-gradient(circle at 14% 18%, rgba(150,118,78,.13) 0 20%, transparent 55%),
       radial-gradient(circle at 86% 9%, rgba(140,108,70,.11) 0 16%, transparent 52%),
@@ -26,8 +26,8 @@
   .rule.double{border-top:3px double var(--rule)}
   .parties{text-align:center;margin:.6rem 0 1.2rem;font-size:10.4pt}
   .parties strong{font-variant:small-caps;letter-spacing:.04em}
-  h2{font-size:10.6pt;margin:1.05rem 0 .3rem;font-variant:small-caps;letter-spacing:.06em;font-weight:600}
-  p{margin:.4rem 0;text-align:justify;hyphens:auto}
+  h2{font-size:10.3pt;margin:.82rem 0 .26rem;font-variant:small-caps;letter-spacing:.06em;font-weight:600}
+  p{margin:.32rem 0;text-align:justify;hyphens:auto}
   ul,ol{margin:.35rem 0 .5rem 1.15rem;padding:0}
   li{margin:.12rem 0}
   .sig{display:flex;gap:2rem;margin-top:1.4rem}
@@ -42,13 +42,13 @@
   .annex{margin-top:1.5rem;padding:.8rem 1rem;border:1px solid var(--rule);border-left:4px solid var(--rule)}
   .annex h2{margin-top:0}
   blockquote{margin:.4rem 0;padding-left:.9rem;border-left:2px solid var(--rule);font-style:italic}
-  .hand{font-family:'Bradley Hand','Segoe Script','Comic Sans MS',cursive;color:var(--faded)}
-  .margin-note{position:absolute;font-size:8.2pt;color:var(--faded);max-width:34mm;line-height:1.3;
-    font-family:'Bradley Hand','Segoe Script','Comic Sans MS',cursive}
-  .mn-r{right:4mm;text-align:left;transform:rotate(1.5deg)}
-  .mn-l{left:4mm;text-align:right;transform:rotate(-1.5deg)}
-  .akte{position:absolute;top:9mm;right:18mm;font-size:8.4pt;letter-spacing:.11em;color:var(--faded)}
-  .foot{position:absolute;bottom:11mm;left:20mm;right:20mm;display:flex;justify-content:space-between;
+  .hand{font-family:Cardo,'Crimson Text','Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;font-style:italic;color:var(--faded)}
+  .margin-note{position:absolute;font-size:7.8pt;color:var(--faded);width:26mm;line-height:1.28;
+    font-family:Cardo,'Crimson Text','Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;font-style:italic}
+  .mn-r{right:3mm;text-align:left;transform:rotate(1.5deg)}
+  .mn-l{left:3mm;text-align:right;transform:rotate(-1.5deg)}
+  .akte{position:absolute;top:9mm;right:32mm;font-size:8.4pt;letter-spacing:.11em;color:var(--faded)}
+  .foot{position:absolute;bottom:11mm;left:32mm;right:32mm;display:flex;justify-content:space-between;
     font-size:8.2pt;color:var(--faded)}
   table{width:100%;border-collapse:collapse;margin:.6rem 0;font-size:9.8pt}
   th,td{border:1px solid var(--rule);padding:.26rem .45rem;text-align:left}
@@ -60,7 +60,8 @@
   .kv dd{margin:0;font-weight:600}
   @media print{
     html,body{background:#fff;padding:0}
-    .sheet{margin:0;box-shadow:none;width:auto;min-height:auto;page-break-after:always}
+    .sheet{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .sheet{margin:0;box-shadow:none;width:210mm;height:297mm;min-height:297mm;page-break-after:always}
     .sheet:last-child{page-break-after:auto}
     @page{size:A4;margin:0}
   }
@@ -104,7 +105,7 @@
   <p>Die Prüfung obliegt allein einem von der Empfangsstelle bestimmten Begutachter. Er prüft Zahl, Alter, Zustand, Art und Grad der Befähigung sowie die Formbarkeit einer jeden Person.</p>
   <p>Der Begutachter nimmt an oder weist zurück. Seine Entscheidung ist endgültig und wird nicht begründet. Zurückgewiesene zählen nicht als Lieferung und verbleiben in der Verfügung des Hauses.</p>
 
-  <div class="foot"><span>Blatt I von II</span><span>St/YG — 1039</span></div>
+  <div class="foot"><span>Blatt I von III</span><span>St/YG — 1039</span></div>
 </section>
 
 <!-- ============ SEITE 2 ============ -->
@@ -130,6 +131,13 @@
   <p>Beide Seiten schweigen über Bestand und Inhalt dieser und der vorausgegangenen Abreden.</p>
   <p>Die Empfangsstelle verwahrt an Orten ihrer Wahl Abschriften, Briefe, Frachtverzeichnisse, Siegelabdrücke, Namen von Bevollmächtigten des Hauses sowie sämtliche bisherigen Empfangsbestätigungen. Diese Verwahrung bleibt unberührt und ist dem Hause nicht zugänglich.</p>
   <p>Solange das Haus erfüllt, bleiben die verwahrten Zeugnisse verschlossen.</p>
+
+  <div class="foot"><span>Blatt II von III</span><span>St/YG — 1039</span></div>
+</section>
+
+<!-- ============ SEITE 3 ============ -->
+<section class="sheet">
+  <div class="akte">St/YG — Best. 1039</div>
 
   <h2>§ 7 — Fortdauer der Leistungen der Empfangsstelle</h2>
   <p>Die der Hausflotte und den Handelswegen gewährten Sicherungen — Weisung der Instrumente, Verschluss der Behältnisse, Beständigkeit der Schutzzeichen, Verbergung der nicht zu nennenden Wege — sind an die Erfüllung gebunden.</p>
@@ -170,7 +178,7 @@
     <p class="hand" style="margin-top:.5rem">Funken. So nannten sie es schon zu Großvaters Zeiten.</p>
   </div>
 
-  <div class="foot"><span class="hand">Zweitstück nicht im Hause.</span><span>Blatt II von II</span></div>
+  <div class="foot"><span class="hand">Zweitstück nicht im Hause.</span><span>Blatt III von III</span></div>
 </section>
 
 <!-- ============ SEITE 3 — T7b ============ -->
