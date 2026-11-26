@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light dark">
+<title>Stoerrebrandt-Kampagne – Spielleiter-Cockpits</title>
+<style>
+  :root{
+    --bg:#cdbb9a; --panel:#f3e7cd; --panel2:#e5d5b4; --ink:#31261b; --muted:#6f5c45;
+    --accent:#2f4f63; --accent2:#8a4b2a; --rule:#b39a71; --gold:#a8823c;
+    --shadow:0 2px 4px rgba(49,38,27,.12), 0 12px 28px rgba(49,38,27,.18);
+    --grain:radial-gradient(circle at 18% 22%, rgba(160,128,86,.16) 0 22%, transparent 60%),
+            radial-gradient(circle at 82% 12%, rgba(150,118,78,.13) 0 18%, transparent 55%),
+            radial-gradient(circle at 62% 78%, rgba(140,108,70,.14) 0 24%, transparent 62%);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{--bg:#171512; --panel:#241f19; --panel2:#2f2921; --ink:#ece0c9; --muted:#a9998a;
+          --accent:#8fb3c4; --accent2:#d0966b; --rule:#4a4034; --gold:#c19a52;
+          --shadow:0 2px 4px rgba(0,0,0,.4), 0 12px 28px rgba(0,0,0,.45);
+          --grain:radial-gradient(circle at 20% 20%, rgba(255,225,180,.05) 0 25%, transparent 60%);}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:var(--bg);background-image:var(--grain);
+    background-attachment:fixed;color:var(--ink);line-height:1.6;
+    font-family:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    display:flex;align-items:center;justify-content:center;padding:2rem 1rem}
+  main{width:100%;max-width:46rem}
+  h1{font-variant:small-caps;letter-spacing:.04em;font-size:1.9rem;margin:0 0 .2rem;color:var(--accent2)}
+  .sub{margin:0 0 2rem;color:var(--muted);font-size:.95rem;
+    font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif}
+  .grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr))}
+  a.card{display:block;text-decoration:none;color:inherit;background:var(--panel);
+    background-image:var(--grain);border:1px solid var(--rule);border-left:5px solid var(--gold);
+    border-radius:.25rem;box-shadow:var(--shadow);padding:1.1rem 1.2rem;transition:transform .12s ease}
+  a.card:hover{transform:translateY(-2px);border-left-color:var(--accent2)}
+  a.card h2{margin:0 0 .25rem;font-size:1.15rem;font-variant:small-caps;letter-spacing:.05em;color:var(--accent)}
+  a.card p{margin:0;font-size:.9rem;color:var(--muted);
+    font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif}
+  .tag{display:inline-block;margin-bottom:.5rem;padding:.12rem .5rem;border-radius:.25rem;
+    border:1px solid var(--rule);background:var(--panel2);color:var(--muted);
+    font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;
+    font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif}
+  .note{margin-top:2rem;padding-top:1rem;border-top:1px solid var(--rule);
+    color:var(--muted);font-size:.85rem;
+    font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif}
+</style>
+</head>
+<body>
+<main>
+  <h1>Stoerrebrandt-Kampagne</h1>
+  <p class="sub">Spielleiter-Cockpits · Das Schwarze Auge</p>
+  <div class="grid">
+    <a class="card" href="/stoerrebrandt/havena/">
+      <span class="tag">Teil 2 · gespielt</span>
+      <h2>Havena</h2>
+      <p>Elf Handlungsknoten, Vorlesetexte, Figuren, Orte, Karte, Handouts, Kampf und Heldengruppe.</p>
+    </a>
+    <a class="card" href="/stoerrebrandt/thorwal/">
+      <span class="tag">Teil 3 · in Arbeit</span>
+      <h2>Thorwal</h2>
+      <p>Elf Knoten, Enthüllungsstufen, Vertragschronik, Beziehungsnetz, Reaktionsmatrix und Handout-Status.</p>
+    </a>
+  </div>
+  <p class="note">Enthält Spielleiterwissen. Notizen, Marker und Fortschritt werden lokal im Browser gespeichert und sind pro Gerät getrennt. Vor dem Leeren des Browserspeichers im Cockpit auf „Sichern“ klicken.</p>
+</main>
+</body>
+</html>
