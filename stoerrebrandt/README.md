@@ -7,9 +7,10 @@ Spielleiter-Cockpits für eine mehrteilige DSA-Kampagne. Jede Seite ist eine ein
 | Pfad | Teil | Stand |
 |---|---|---|
 | `havena/index.html` | Teil 2 – Havena | gespielt und abgeschlossen |
-| `thorwal/index.html` | Teil 3 – Thorwal | elf Knoten fertig, ohne Vorlesetexte und Handouts |
+| `thorwal/index.html` | Teil 3 – Thorwal | elf Knoten und neun Handouts fertig, Vorlesetexte offen |
 | `karte/index.html` | Teil 3 – Thorwal | interaktive 3D-Stadtkarte mit Heldenposition und Reiseweg |
 | `material/` | Zusammenfassungen, Spielertexte, Bildprompts, Planung | laufend |
+| `material/pdf/` | Handouts als druckfertige A4-PDF, einzeln und gesammelt | T1–T8, T7, T7b fertig |
 | `o1-…webp` bis `o8-…webp` | Teil 3 – Thorwal | Ortsbilder nach `material/Thorwal_Bildprompt_Orte.md` |
 
 ## 3D-Karte Thorwal
