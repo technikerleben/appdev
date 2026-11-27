@@ -13,6 +13,8 @@ Spielleiter-Cockpits für eine mehrteilige DSA-Kampagne. Jede Seite ist eine ein
 | `material/pdf/` | Handouts als druckfertige A4-PDF, einzeln und gesammelt | T1–T8, T7, T7b fertig |
 | `o1-…webp` bis `o8-…webp` | Teil 3 – Thorwal | Ortsbilder nach `material/Thorwal_Bildprompt_Orte.md` |
 
+Das Thorwal-Cockpit verlinkt die Handout-PDF direkt: auf jeder Handout-Karte unter „Druckfassung“, in der Seitenspalte jedes Knotens und gesammelt oben im Handout-Register. Die Links sind relativ (`../material/pdf/…`) und funktionieren nur, solange das Cockpit neben dem Materialordner liegt. Lädt man `thorwal/index.html` allein herunter, bleibt die Seite vollständig benutzbar, nur die PDF-Links laufen dann ins Leere.
+
 ## 3D-Karte Thorwal
 
 `karte/` enthält die Karte und ihre Bibliotheken unter `karte/vendor/` (three.js r128 mit OrbitControls, MIT-Lizenz, sowie die Schriften Grenze Gotisch und Alegreya Sans, SIL OFL). Alles liegt lokal, weil die CSP dieses Pfads keine fremden Skripte und Schriften erlaubt.
