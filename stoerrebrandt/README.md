@@ -12,6 +12,7 @@ Spielleiter-Cockpits für eine mehrteilige DSA-Kampagne. Jede Seite ist eine ein
 | `material/` | Zusammenfassungen, Spielertexte, Bildprompts, Planung | laufend |
 | `material/pdf/` | Handouts als druckfertige A4-PDF, einzeln und gesammelt | T1–T8, T7, T7b fertig |
 | `o1-…webp` bis `o8-…webp` | Teil 3 – Thorwal | Ortsbilder nach `material/Thorwal_Bildprompt_Orte.md` |
+| `material/handout-bilder/` | Jedes Handout-Blatt als Bild (WebP, 160 dpi) für die Anzeige auf dem Fernseher | T1–T8, T7 Blatt I–III, T7b |
 | `material/bilder/` | Figurenbögen P1 und P2 im Original, Einzelporträts ohne Namensplakette | sechs von acht Figuren, Tjalfe und Ylva fehlen noch |
 
 Die sechs Porträts sind zusätzlich als Daten-URI in `thorwal/index.html` eingebettet, damit das Cockpit als Einzeldatei portabel bleibt. Sie erscheinen auf den Figurenkarten und in der Knoten-Seitenspalte unter „Gesichter in diesem Knoten“; ein Klick zeigt das Bild bildschirmfüllend zum Herzeigen, ohne Namen. Der Bogen P1 wurde noch mit den alten Platzhaltern „Der alte Seemann“ und „Der Kontorschreiber“ erzeugt; diese beiden Bilder sind nicht eingebunden.
@@ -58,3 +59,11 @@ Wenn diese Ausnahme irgendwann stören sollte, lässt sich das Skript pro Cockpi
 Notizen, Marker, Knotenfortschritt und die Heldengruppe liegen im `localStorage` des jeweiligen Browsers, getrennt pro Cockpit (`havena-cockpit-v2`, `thorwal-cockpit-v1`). Sie wandern nicht zwischen Geräten. Jedes Cockpit hat oben rechts „Sichern“ und „Laden“ für den Export als JSON.
 
 Die Karte enthält bewusst nur Ortsnamen und Bilder, keine Abenteuerinhalte. Beschreibungen, Knoten und Kürzel stehen ausschließlich im Cockpit und im Material.
+
+## Fernseher: Bilder vom Cockpit auf die Karte schicken
+
+Für den Spieltisch mit zweitem Bildschirm: Cockpit und Karte laufen als zwei Fenster im selben Browser, die Karte im Vollbild (F11) auf dem Fernseher. Im Cockpit oben links zeigt die Karte „Fernseher“, ob die Karte gefunden wurde. Die Knöpfe „Auf TV“ an Porträts und Handouts schicken das Bild auf die Karte, „Ausblenden“ holt die Karte zurück. Auf dem Fernseher schließt auch ein Klick oder Esc die Anzeige.
+
+Technisch sprechen beide Seiten über einen `BroadcastChannel` namens `stoerrebrandt-buehne`, ersatzweise über `storage`-Ereignisse. Das braucht keinen Server, funktioniert aber nur im selben Browser auf demselben Rechner und nur, wenn beide Seiten von derselben Adresse kommen (beide von Vercel oder beide aus demselben lokalen Ordner).
+
+Die Karte speichert nichts davon. Die Bilder kommen nur während der Sitzung vom Cockpit herüber und sind nach dem Neuladen weg. Die Karte enthält damit weiterhin keine Abenteuerinhalte.

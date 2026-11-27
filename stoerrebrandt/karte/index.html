@@ -549,5 +549,61 @@ if(innerWidth<=760){$('panel').classList.add('min');document.body.classList.add(
 requestAnimationFrame(loop);
 }
 </script>
+<!-- Bühne: zeigt Bilder an, die das Spielleiter-Cockpit im selben Browser schickt.
+     Die Karte speichert davon nichts; nach dem Neuladen ist die Bühne leer. -->
+<style>
+#buehne{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;
+  padding:3vh 3vw;background:radial-gradient(ellipse at center,rgba(28,22,15,.9) 0%,rgba(10,8,6,.97) 70%);
+  opacity:0;pointer-events:none;transition:opacity .45s ease}
+#buehne.on{opacity:1;pointer-events:auto;cursor:none}
+#buehne img{height:100%;width:auto;max-width:100%;object-fit:contain;
+  border:.6vh solid #e8d9b8;border-radius:.4vh;box-shadow:0 2vh 8vh rgba(0,0,0,.7);
+  transform:scale(.985);transition:transform .45s ease}
+#buehne.on img{transform:scale(1)}
+@media (prefers-reduced-motion:reduce){#buehne,#buehne img{transition:none}}
+</style>
+<div id="buehne" aria-hidden="true"><img alt=""></div>
+<script>
+(function(){
+  var KEY='stoerrebrandt-buehne', stage=document.getElementById('buehne'), img=stage.querySelector('img');
+  var bc=null, last='', current=null;
+  try{ if('BroadcastChannel' in window) bc=new BroadcastChannel(KEY); }catch(e){}
+  function send(m){
+    m.id=Date.now()+'-'+Math.random().toString(36).slice(2,8);
+    try{ if(bc) bc.postMessage(m); }catch(e){}
+    try{ localStorage.setItem(KEY,JSON.stringify(m)); localStorage.removeItem(KEY); }catch(e){}
+  }
+  function allowed(src){
+    if(typeof src!=='string') return false;
+    if(/^data:image\/(webp|png|jpeg);base64,/.test(src)) return true;
+    try{ return new URL(src,location.href).origin===location.origin; }catch(e){ return false; }
+  }
+  function hide(){
+    stage.classList.remove('on'); stage.setAttribute('aria-hidden','true'); current=null;
+    setTimeout(function(){ if(!stage.classList.contains('on')) img.removeAttribute('src'); },500);
+  }
+  function show(src,label){
+    var pre=new Image();
+    pre.onload=function(){ img.src=src; stage.classList.add('on'); stage.setAttribute('aria-hidden','false'); current=label||'Bild'; send({type:'state',current:current}); };
+    pre.onerror=function(){ send({type:'state',current:current,error:'Bild nicht gefunden'}); };
+    pre.src=src;
+  }
+  function handle(m){
+    if(!m||typeof m!=='object'||!m.id||m.id===last) return;
+    last=m.id;
+    if(m.type==='ping'){ send({type:'pong',current:current}); return; }
+    if(m.type==='hide'){ hide(); send({type:'state',current:null}); return; }
+    if(m.type==='show'&&allowed(m.src)) show(m.src,String(m.label||'').slice(0,80));
+  }
+  if(bc) bc.onmessage=function(e){ handle(e.data); };
+  window.addEventListener('storage',function(e){
+    if(e.key!==KEY||!e.newValue) return;
+    try{ handle(JSON.parse(e.newValue)); }catch(err){}
+  });
+  stage.addEventListener('click',function(){ hide(); send({type:'state',current:null}); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&stage.classList.contains('on')){ hide(); send({type:'state',current:null}); } });
+  send({type:'pong',current:null});
+})();
+</script>
 </body>
 </html>
