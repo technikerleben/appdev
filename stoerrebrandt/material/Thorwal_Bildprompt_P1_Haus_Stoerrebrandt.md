@@ -1,6 +1,6 @@
 # Thorwal — Bildprompt P1: Das Haus Stoerrebrandt
 
-Leomar Stoerrebrandt · Arvid Stoerrebrandt · der alte Seemann · der Kontorschreiber
+Leomar Stoerrebrandt · Arvid Stoerrebrandt · Tjalfe Ragnasdottir · Ylva Garvaldsdottir
 
 ## Stilblock (identisch in allen Thorwal-Prompts)
 
@@ -14,9 +14,9 @@ Top left, plaque "LEOMAR STOERREBRANDT": a merchant of about seventy, upright an
 
 Top right, plaque "ARVID STOERREBRANDT": a merchant in his mid fifties, grey-streaked beard, dark expensive wool without ornament, heavy signet ring, a leather document case under one arm. Clearly a visitor here, not a local. Quiet and watchful, the look of a man doing sums while he listens.
 
-Bottom left, plaque "DER ALTE SEEMANN": a ship's carpenter in his mid forties, broad shoulders, close-cropped beard, missing fingertips on one hand, worn leather apron over a coarse shirt, wood shavings on his sleeves. Guarded, faintly ashamed, looking past the viewer.
+Bottom left, plaque "TJALFE RAGNASDOTTIR": a woman shipwright in her mid forties, broad shoulders, hair cropped short, two fingertips missing on one hand, worn leather apron over a coarse shirt, wood shavings clinging to her sleeves, an adze resting on one shoulder. She looks straight at the viewer, matter-of-fact and unembarrassed, someone who considers lying a waste of time.
 
-Bottom right, plaque "DER KONTORSCHREIBER": a northern clerk barely twenty, proud of the position, neat but inexpensive clothing cut in a southern style that does not quite sit on broad shoulders, ink on the fingers, a wax tablet held like something valuable.
+Bottom right, plaque "YLVA GARVALDSDOTTIR": a young northern woman barely twenty, a merchant's clerk proud of her position, neat but inexpensive clerk's coat cut in a southern style that does not quite sit on her broad shoulders, ink on her fingers, a wax tablet held against her chest like something valuable. Open, earnest, loyal.
 
 ## Negativ
 
@@ -29,3 +29,5 @@ Leomars Gesicht ist der wichtigste Treffer des ganzen Bogens. Er darf auf keinen
 Falls nötig, diesen Rahmen einzeln nachgenerieren mit dem Zusatz: *kindly, open, slightly amused expression, the face of a trusted elder*.
 
 Asgrim Harkson taucht bewusst in keinem Bogen auf. Er ist in Thorwal nicht anwesend, und Zeugenbeschreibungen widersprechen sich in Kleinigkeiten.
+
+Tjalfe und Ylva sind seit Stufe 0 gesetzt. Beide sind Frauen; wer noch ein Bild mit den alten Platzhaltern „Der alte Seemann“ oder „Der Kontorschreiber“ hat, sollte die untere Reihe neu erzeugen.
