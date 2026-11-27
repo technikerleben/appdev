@@ -12,6 +12,9 @@ Spielleiter-Cockpits für eine mehrteilige DSA-Kampagne. Jede Seite ist eine ein
 | `material/` | Zusammenfassungen, Spielertexte, Bildprompts, Planung | laufend |
 | `material/pdf/` | Handouts als druckfertige A4-PDF, einzeln und gesammelt | T1–T8, T7, T7b fertig |
 | `o1-…webp` bis `o8-…webp` | Teil 3 – Thorwal | Ortsbilder nach `material/Thorwal_Bildprompt_Orte.md` |
+| `material/bilder/` | Teil 3 – Thorwal | Figurenbögen P1 und P2 im Original, Einzelporträts ohne Namensplakette | sechs von acht Figuren; Tjalfe und Ylva fehlen noch |
+
+Die sechs Porträts sind zusätzlich als Daten-URI in `thorwal/index.html` eingebettet, damit das Cockpit als Einzeldatei portabel bleibt. Sie erscheinen auf den Figurenkarten und in der Knoten-Seitenspalte unter „Gesichter in diesem Knoten“; ein Klick zeigt das Bild bildschirmfüllend zum Herzeigen, ohne Namen. Der Bogen P1 wurde noch mit den alten Platzhaltern „Der alte Seemann“ und „Der Kontorschreiber“ erzeugt; diese beiden Bilder sind nicht eingebunden.
 
 Das Thorwal-Cockpit verlinkt die Handout-PDF direkt: auf jeder Handout-Karte unter „Druckfassung“, in der Seitenspalte jedes Knotens und gesammelt oben im Handout-Register. Die Links sind relativ (`../material/pdf/…`) und funktionieren nur, solange das Cockpit neben dem Materialordner liegt. Lädt man `thorwal/index.html` allein herunter, bleibt die Seite vollständig benutzbar, nur die PDF-Links laufen dann ins Leere.
 
